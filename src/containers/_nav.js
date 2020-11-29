@@ -13,6 +13,12 @@ export default [
     }
   },
   {
+    _tag: 'CSidebarNavItem',
+    name: 'Business',
+    to: '/business',
+    icon: 'cil-drop',
+  },
+  {
     _tag: 'CSidebarNavTitle',
     _children: ['Theme']
   },

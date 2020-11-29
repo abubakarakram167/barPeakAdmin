@@ -10,7 +10,14 @@ import {
   CCol,
   CProgress,
   CRow,
-  CCallout
+  CCallout,
+  CContainer,
+  CFormGroup,
+  CLabel,
+  CInput,
+  CFormText,
+  CForm
+
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
@@ -27,7 +34,7 @@ const Dashboard = () => {
         <CCardBody>
           <CRow>
             <CCol sm="5">
-              <h4 id="traffic" className="card-title mb-0">Traffic</h4>
+              <h4 id="traffic" className="card-title mb-0">Trafficsssss</h4>
               <div className="small text-muted">November 2017</div>
             </CCol>
             <CCol sm="7" className="d-none d-md-block">
@@ -108,6 +115,40 @@ const Dashboard = () => {
       </CCard>
 
       <WidgetsBrand withCharts/>
+      
+      <CContainer fluid>
+      <CRow>
+        <CCol sm="12">
+          <CForm action="" method="post">
+            <CFormGroup>
+              <CLabel htmlFor="nf-email">Email</CLabel>
+              <CInput
+                type="email"
+                id="nf-email"
+                name="nf-email"
+                placeholder="Enter Email.."
+                autoComplete="email"
+              />
+              <CFormText className="help-block">Please enter your email</CFormText>
+            </CFormGroup>
+            <CFormGroup>
+              <CLabel htmlFor="nf-password">Password</CLabel>
+              <CInput
+                type="password"
+                id="nf-password"
+                name="nf-password"
+                placeholder="Enter Password.."
+                autoComplete="current-password"
+              />
+              <CFormText className="help-block">Please enter your password</CFormText>
+            </CFormGroup>
+          </CForm>
+        </CCol>
+      </CRow>
+    </CContainer>
+
+
+
 
       <CRow>
         <CCol>
