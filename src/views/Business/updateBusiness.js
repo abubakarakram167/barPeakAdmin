@@ -5,18 +5,13 @@ import {
  } from '@coreui/react'
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import BusinessAddForm from "../Forms/AddBusinessForm";
+import BusinessEditForm from "../Forms/UpdateBusinessForm";
 export default (props) => {
-
-
-useEffect(() => {
-
-}, []);
-
+  console.log("props", props)
   const {place_id} = props.match.params
   return(
   <div>
-    <BusinessAddForm placeId = { place_id } history = {props.history}  />  
+    <BusinessEditForm placeId = { place_id }  history = {props.history} />  
   </div>
   )
 }

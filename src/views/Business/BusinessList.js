@@ -6,41 +6,20 @@ import {
 import Card from './BusinessCard'
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-export default () => {
-  const [allBusinesses, setBusinesses]=useState([]);
-  const latitude = 32.7970465;
-  const longitude = -117.2545220;
-
-  useEffect(() => {
-    const fetchData = async()=>{
-     try{
-      
-      const res = await axios.get(`http://localhost:3000/getGoogleMapsResults`);
-      // let specificPlaces = data.map(business => business.placeId);
-    
-      // const filteredBusiness = res.data.results.filter((business)=>{
-      //   return(specificPlaces.includes(business.place_id));
-      // })
-      console.log("the data", res.data);
-      setBusinesses(res.data)
-     }catch(err){
-       console.log("the error", err)
-     }  
-    }
-    fetchData();
-  }, []);
+export default (props) => {
+  
 
   // console.log("the data", allBusinesses);
-
+  const { businesses } = props;
   return(
     <div>
       <CContainer>
         <CRow style = {{ marginTop: 10 }} >
-          { allBusinesses.length && allBusinesses.map((business)=>{
+          { businesses.length && businesses.map((business)=>{
               if(business.business_status === "OPERATIONAL"){
               return(
                 <CCol sm="4" >
-                  <Card showLink = {true} business = {business} />
+                  <Card showLink = {true} business = {business} update = { props.update }  />
                 </CCol>
               );
             }

@@ -40,10 +40,11 @@ import {
           <img 
             src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${business.photos[0].photo_reference}&key=AIzaSyD9CLs9poEBtI_4CHd5Y8cSHklQPoCi6NM`}
             alt="new"
-            style = {{ width: 300, height: 200, position: 'relative' }}
+            style = {{ width: "100%", height: 200, position: 'relative' }}
           />
-          { props.showLink &&
-          <Link to={`addBusiness/${business.place_id}`}>ADD</Link>
+          { props.showLink && !props.update ?
+            <Link to={`addBusiness/${business.place_id}`}>ADD</Link>
+            : <Link to={`updateBusiness/${business.place_id}`}>Edit</Link>
           }
           {/* <CButton
             className="m-2"

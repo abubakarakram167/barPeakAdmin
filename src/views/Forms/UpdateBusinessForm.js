@@ -13,41 +13,30 @@ import {
 import axios from '../../api';
 import AxiosApi from 'axios';
 import { useState, useEffect } from 'react';
+import SimpleReactValidator from 'simple-react-validator';
 import { getUserData } from '../../localStorage';
 import { Rating } from '@material-ui/lab';
 import BusinessCard from '../Business/BusinessCard';
 import _, { map } from 'underscore';
 import { ToastContainer } from 'react-toastify';
 import { MDBNotification } from "mdbreact";
-import { Alert } from 'antd';
+import { message, Button } from 'antd';
 import Modal from '../../components/Modal';
-
+import { Alert } from 'antd';
 export default (props) => {
   
   const [allCateogories, setCategories]=useState([]);
   const [isBar, setBar]=useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    shortDescription: '',
-    longDescription: '',
-    category: '',
-    ageInterval: ''
-  });
-  const [ratingData, setRatingData] = useState({
-    fun: 5,
-    crowd: 5,
-    girlToGuyRatio: 5,
-    difficultyGettingIn: 5,
-    difficultyGettingDrink: 5
-  });
+  const [formData, setFormData] = useState({});
+  const [ratingData, setRatingData] = useState({});
   const [googleDetailData, setGoogleDetailData] = useState({});
-  const [error, setError] = useState({})
   const [showPopup, setShowPopup] = useState(false);
   const [success, setSuccess] = useState(true); 
+  const [error, setError] = useState({})
+
 
   const onChange = (event) => {
     const { name, value } = event.target;
-    
     if(name === "category"){
       const specificCategory = allCateogories.filter(category => category._id === value)[0]
       console.log("the specific category", specificCategory);
@@ -56,7 +45,7 @@ export default (props) => {
       else
         setBar(false) 
     }
-
+     
     setFormData(prevState => ({ ...prevState, [name]: value }));
   }
 
@@ -85,10 +74,6 @@ export default (props) => {
       isValid = false;
       errors["longDescription"] = "Please input long Description"
     }
-    if(formData.ageInterval === "" || formData.ageInterval === undefined){
-      isValid = false;
-      errors["ageInterval"] = "Please select your age"
-    }
     if(formData.category === "" || formData.category === undefined){
       console.log("category")
       isValid = false;
@@ -111,15 +96,17 @@ export default (props) => {
   const submitForm = async () => {
     const { token } = await getUserData();
     const category = isBar ? formData.barCategory : formData.category;
-
-    console.log("the form data", formData);
-    console.log("the rating data", ratingData)
+    
+    // console.log("at submission", formData);
+    // console.log("at submission", ratingData)
+    // console.log("the category", category)
 
     if(validate()){
+      console.log("inn")
       const body = {
         query:` 
         mutation{
-          createBusiness(businessInput: {
+          updateBusiness(businessInput: {
               category: "${category}",
               title: "${formData.title}",
               placeId: "${props.placeId}",
@@ -144,20 +131,20 @@ export default (props) => {
         const res = await axios.post(`graphql?`,body,{ headers: {
           'Authorization': `Bearer ${token}`
         } })
-        console.log("the response on getting data", res.data.data);
-        if(res.data.data.createBusiness){
+        if(res.data.data.updateBusiness){
           setShowPopup(true)
         } 
         console.log("the response after getting business", res); 
       }catch(err){
-        if(err.response.data){
-          console.log("the error", err.data.errors.length)
-        }
-        console.log("the error below", err)
+        // if(err.response.data){
+        //   console.log("the error", err.data.errors.length)
+        // }
+        setShowPopup(true)
+        setSuccess(false);
+        console.log("the error below", err.response)
         
       }
     }
-
   }
   
 
@@ -175,14 +162,50 @@ export default (props) => {
           }
         }` 
       }
+      const singleBusinessBody = {
+        query: `
+        query{
+          getSingleBusiness(placeId: "${props.placeId}"){
+                 placeId,
+                 category{
+                     title
+                     type
+                     imageUrl
+                     _id
+                 },
+                 shortDescription,
+                 longDescription,
+                 title,
+                 ageInterval,
+                 rating{
+                     fun,
+                     crowd,
+                     girlToGuyRatio,
+                     difficultyGettingIn,
+                     difficultyGettingDrink
+                 }
+             }
+        }`
+      }
       try{
         const res = await axios.post(`graphql?`,body,{ headers: {
           'Authorization': `Bearer ${token}`
         } });
-        const getSingleData = await axios.get(`http://localhost:3000/getSinglePlaceResult?place_id=${props.placeId}`);
-        // console.log("the google detail data", getSingleData)
+        const getSingleGoogleData = await axios.get(`http://localhost:3000/getSinglePlaceResult?place_id=${props.placeId}`);
+        const getSingleBusinessData = await axios.post(`graphql?`,singleBusinessBody,{ headers: {
+          'Authorization': `Bearer ${token}`
+        }});
+        const singleBusiness = getSingleBusinessData.data.data.getSingleBusiness;
         const allSpecificCategories = res.data.data.getCategories
-        setGoogleDetailData(getSingleData.data)
+        if(singleBusiness.category.type === "sub_bar"){
+          setBar(true)
+          singleBusiness.barCategory = singleBusiness.category
+          singleBusiness.category = allSpecificCategories.filter(category => category.title === 'bar')[0]
+        }
+        console.log("the single business detail data", singleBusiness)
+        setRatingData(singleBusiness.rating);
+        setFormData(singleBusiness)
+        setGoogleDetailData(getSingleGoogleData.data)
         setCategories(allSpecificCategories);
       }catch(err){
         console.log("the error", err);
@@ -191,28 +214,27 @@ export default (props) => {
     fetchData();
   }, []);
 
-     console.log("the google detail data", googleDetailData)
-  // console.log("form Data", formData)
-  // console.log("the rating Data", ratingData);
+    //  console.log("the google detail data", googleDetailData)
+   console.log("form Data", formData)
+   console.log("the rating Data", ratingData);
 
   return(
     <div>
-      
       <CContainer style = {{ width: "50%" }}  >
         <CRow>
-          <Modal showPopup = {showPopup} success = {success} history = {props.history} message = {"Business Added SuccessFully"} />
+          <Modal showPopup = {showPopup} success = {success} history = {props.history} message = {"Business Updated SuccessFully"} />
         </CRow>
         <CRow>
-          <MDBNotification
-            show = {false}
+          {/* <MDBNotification
+            show = {showAlert}
             fade
-            autohide = {3000}
+            autohide = {10000}
             icon="envelope"
             iconClassName="green-text"
             title="Success"
-            message="Business Sccessfull Added"
+            message="Business Sccessfull Updated"
             text="1min ago"
-          />
+          /> */}
         </CRow>
         <CRow>
           <CCol sm = "12" >
@@ -230,7 +252,6 @@ export default (props) => {
                   type="text"
                   id="title"
                   name="title"
-                  required
                   placeholder="Enter title.."
                   defaultValue = {googleDetailData["name"]}
                   value = { formData.title }
@@ -248,7 +269,7 @@ export default (props) => {
                   value = { formData.shortDescription }
                   rows = "2"
                 />
-                  {error.shortDescription &&  <Alert message="Short Description is required" type="error" />  }
+                 {error.shortDescription &&  <Alert message="SHort Description is required" type="error" />  }
                 <CFormText className="help-block">Please enter Short Description</CFormText>
               </CFormGroup>
               <CFormGroup>
@@ -269,7 +290,8 @@ export default (props) => {
                 <CLabel >Category</CLabel>
                 <select 
                   onChange = {onChange}
-                  name = "category" 
+                  name = "category"
+                  value = {!_.isEmpty(formData) &&formData.category._id} 
                   style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
                 >
                   { allCateogories.map((category)=>{
@@ -281,7 +303,7 @@ export default (props) => {
                     })
                   }
                 </select>
-                {error.category &&  <Alert message="Select Atleast one category" type="error" />  }
+                {error.category &&  <Alert message="category is required" type="error" />  }
                 <CFormText className="help-block">Please Select Category</CFormText>
               </CFormGroup>
               { isBar &&
@@ -290,6 +312,7 @@ export default (props) => {
                   <select 
                     onChange = { onChange } 
                     name = "barCategory"
+                    value = { !_.isEmpty(formData) && formData.barCategory &&formData.barCategory._id }
                     style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
                   >
                     { allCateogories.map((category)=>{
@@ -301,7 +324,7 @@ export default (props) => {
                       })
                     }
                   </select>
-                  {error.barCategory &&  <Alert message="Select Atleast one category" type="error" />  }
+                  {error.barcategory &&  <Alert message="category is required" type="error" />  }
                   <CFormText className="help-block">Please Select Bar Category</CFormText>
                 </CFormGroup>)
               }
@@ -310,48 +333,48 @@ export default (props) => {
                 <select 
                   onChange = {onChange } 
                   name = "ageInterval"
+                  value = {formData.ageInterval}
                   style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
                 >
                   <option selected value="young">21-25</option>
                   <option value="elder">26-40</option>
                   <option value="all">All</option>
                 </select>
-                {error.ageInterval &&  <Alert message="Your Age is required be to Select" type="error" />  }
                 <CFormText className="help-block">Please Select Age</CFormText>
               </CFormGroup>
               <p style = {{ fontSize: 20 }} >Rating:</p>
               <CFormGroup>
                 <CLabel style = {{ fontSize: 20 }} > Fun :</CLabel>
                 <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name="fun" value={ratingData.fun} onChange = { onChangeRating } size="large" precision = {0.1} max = {10} />
+                  <Rating name="fun"  value = { ratingData.fun ? ratingData.fun : 5  } onChange = { onChangeRating } size="large" precision = {0.1} max = {10} />
                 </span>  
                 <span style = {{ marginLeft: 30, fontSize: 20 }} > { ratingData.fun } </span>
                 <hr />
 
                 <CLabel style = {{ fontSize: 20 }} > Crowd :</CLabel>
                 <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name="crowd" value={ratingData.crowd} onChange = {onChangeRating } size="large" precision = {0.1} max = {10} />
+                  <Rating name="crowd" value = { ratingData.crowd ? ratingData.crowd : 5  }  onChange = {onChangeRating } size="large" precision = {0.1} max = {10} />
                 </span>  
                 <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.crowd }</span>
                 <hr />
 
                 <CLabel style = {{ fontSize: 20 }} > girlToGuyRatio :</CLabel>
                 <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name="girlToGuyRatio" value={ratingData.girlToGuyRatio} onChange = {onChangeRating} size="large" precision = {0.1} max = {10} />
+                  <Rating name="girlToGuyRatio" value = { ratingData.girlToGuyRatio ? ratingData.girlToGuyRatio : 5  }  onChange = {onChangeRating} size="large" precision = {0.1} max = {10} />
                 </span>  
                 <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.girlToGuyRatio }</span>
                 <hr />
 
                 <CLabel style = {{ fontSize: 20 }} > difficultyGettingIn :</CLabel>
                 <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name = "difficultyGettingIn" value={ratingData.difficultyGettingIn} onChange = {onChangeRating} size="large" precision = {0.1} max = {10} />
+                  <Rating name = "difficultyGettingIn" value = { ratingData.difficultyGettingIn ? ratingData.difficultyGettingIn : 5  }  onChange = {onChangeRating} size="large" precision = {0.1} max = {10} />
                 </span>  
                 <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.difficultyGettingIn }</span>
                 <hr />
 
                 <CLabel style = {{ fontSize: 20 }} > difficultyGettingDrink :</CLabel>
                 <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name = "difficultyGettingDrink" value = {ratingData.difficultyGettingDrink} onChange = {onChangeRating} size="large" precision = {0.1} max = {10} />
+                  <Rating name = "difficultyGettingDrink" value = { ratingData.difficultyGettingDrink ? ratingData.difficultyGettingDrink : 5  }  onChange = {onChangeRating} size="large" precision = {0.1} max = {10} />
                 </span>  
                 <span style = {{ marginLeft: 10, fontSize: 20 }} > { ratingData.difficultyGettingDrink } </span>   
               </CFormGroup>
@@ -365,7 +388,7 @@ export default (props) => {
             color = "info"
             onClick = {()=>{ submitForm()  }}
           >
-            ADD Restaurant
+            Edit Restaurant
           </CButton>
           {/* <input type = "submit" />    */}
           </CCol>

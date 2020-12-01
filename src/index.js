@@ -9,7 +9,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css'; import
 'bootstrap-css-only/css/bootstrap.min.css'; 
 import 'mdbreact/dist/css/mdb.css';
 import { icons } from './assets/icons'
-
+import 'antd/dist/antd.css';
 import { Provider } from 'react-redux'
 import store from './store'
 
