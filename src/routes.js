@@ -6,9 +6,9 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'));
 const Business = React.lazy(() => import('./views/Business/Business'));
 const Category = React.lazy(() => import('./views/Category/Category'));
 const CategoryForm = React.lazy(() => import('./views/Forms/CategoryForm'));
+const LoginPage  = React.lazy(() => import('./components/LoginPage'));
 
 const routes = [
-  { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/business', name: 'Business', component: Business },
   { path:'/addBusiness/:place_id', name: 'AddBusiness', component: AddBusiness },

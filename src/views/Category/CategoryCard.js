@@ -11,7 +11,8 @@ import {
   CButton
  } from '@coreui/react'
  import { useState, useEffect } from 'react';
-
+ import { Link } from 'react-router-dom'
+import './category.css';
  export default (props) => {
 
   const { category } = props;
@@ -28,7 +29,8 @@ import {
             src={category.imageUrl}
             alt="new"
             style = {{ width: "100%", height: 200, position: 'relative' }}
-          />  
+          />
+            <Link className = "category-card" to={`categoryAdd/${category._id}`}>Edit</Link>  
           <CCardText>
           </CCardText>
         </CCardBody>

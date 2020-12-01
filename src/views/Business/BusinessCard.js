@@ -43,8 +43,8 @@ import {
             style = {{ width: "100%", height: 200, position: 'relative' }}
           />
           { props.showLink && !props.update ?
-            <Link to={`addBusiness/${business.place_id}`}>ADD</Link>
-            : <Link to={`updateBusiness/${business.place_id}`}>Edit</Link>
+            <Link className = "business-card" to={`addBusiness/${business.place_id}`}>ADD</Link>
+            : <Link className = "business-card" to={`updateBusiness/${business.place_id}`}>Edit</Link>
           }
           {/* <CButton
             className="m-2"
