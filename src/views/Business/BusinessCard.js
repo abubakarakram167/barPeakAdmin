@@ -13,6 +13,7 @@ import {
  import ReactStars from "react-rating-stars-component";
  import { useState, useEffect } from 'react';
  import { Link } from 'react-router-dom'
+ import _, { map } from 'underscore';
 
  export default (props) => {
 
@@ -29,9 +30,9 @@ import {
   }
   const { business } = props;
   // console.log("here the props", props);
-
+  console.log("the business", business)
    return(
-     <div>
+     <div>{!_.isEmpty(business.photos) &&
       <CCard>
         <CCardBody>
           <CCardTitle style = {{ height: 20 }} >
@@ -107,7 +108,7 @@ import {
             </div>
           </CCardText>
         </CCardBody>
-      </CCard>
+      </CCard>}
      </div>
    )
  }

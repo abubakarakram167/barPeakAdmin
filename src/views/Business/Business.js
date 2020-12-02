@@ -23,17 +23,26 @@ export default () => {
   const [notAddedBusiness, setNotAddedBusiness] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setCategory] = useState('');
-  const latitude = 32.7970465;
-  const longitude = -117.2545220;
 
+  //For Testing
+ 
   const onChange = e => {
     setCategory(e.target.value);
     getAllBusinesses(e.target.value)
   };
 
-  const getAllBusinesses = async(businessType) => {
+ 
+
+  const getAllBusinesses = async(businessType, latitude, longitude) => {
     try{ 
-      const res = await axiosApi.get(`http://localhost:3000/getGoogleMapsResults?business_type=${businessType}`);
+      console.log("Latitude ", latitude);
+      console.log("Longitude is :", longitude);
+       //For testing
+       latitude = 32.7970465;
+       longitude = -117.2545220;
+      let radius = 10000;
+      const res = await axiosApi.get(`http://localhost:3000/getGoogleMapsResults?business_type=${businessType}&lat=${latitude}&lon=${longitude}&radius=${radius}`);
+      console.log("the response", res)
       const { token } = await getUserData();
       const body = {
         query:`
@@ -107,7 +116,12 @@ export default () => {
         } });
         setCategories(res.data.data.getCategories)
         setCategory(res.data.data.getCategories[0].title)
-        getAllBusinesses(res.data.data.getCategories[0].title)
+        navigator.geolocation.getCurrentPosition(function(position) {
+          // setLatitude(position.coords.latitude)
+          // setLongitude(position.coords.longitude)
+          getAllBusinesses(res.data.data.getCategories[0].title, position.coords.latitude, position.coords.longitude)
+        });
+       
       }catch(err){
 
       }  
