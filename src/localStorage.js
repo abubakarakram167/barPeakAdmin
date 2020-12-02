@@ -12,3 +12,7 @@ export const storeUserData = async({ token, user }) => {
   console.log("here come the token", token)
   localStorage.setItem('token', token);
 };
+
+export const clearStorage = () => {
+  localStorage.clear();
+};

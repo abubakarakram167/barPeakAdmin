@@ -9,10 +9,12 @@ import {
   CHeaderNavLink,
   CSubheader,
   CBreadcrumbRouter,
-  CLink
+  CLink,
+  CButton
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-
+import './header.css'
+import { clearStorage } from '../localStorage';
 // routes config
 import routes from '../routes'
 
@@ -23,9 +25,15 @@ import {
   TheHeaderDropdownTasks
 }  from './index'
 
-const TheHeader = () => {
+const TheHeader = (props) => {
+  console.log("props", props)
   const dispatch = useDispatch()
   const sidebarShow = useSelector(state => state.sidebarShow)
+
+  const logout = () => {
+    clearStorage();
+    props.history.push('/login');
+  }
 
   const toggleSidebar = () => {
     const val = [true, 'responsive'].includes(sidebarShow) ? false : 'responsive'
@@ -70,6 +78,7 @@ const TheHeader = () => {
         <TheHeaderDropdownTasks/>
         <TheHeaderDropdownMssg/>
         <TheHeaderDropdown/>
+        <CButton className = "logout-button" onClick = {() => logout()} > Log Out </CButton>
       </CHeaderNav>
 
       <CSubheader className="px-3 justify-content-between">

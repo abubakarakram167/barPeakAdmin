@@ -19,8 +19,8 @@ const WidgetsDropdown = () => {
       <CCol sm="6" lg="3">
         <CWidgetDropdown
           color="gradient-primary"
-          header="9.823"
-          text="Members online"
+          header="10"
+          text="Restaurants"
           footerSlot={
             <ChartLineSimple
               pointed
@@ -33,7 +33,7 @@ const WidgetsDropdown = () => {
             />
           }
         >
-          <CDropdown>
+          {/* <CDropdown>
             <CDropdownToggle color="transparent">
               <CIcon name="cil-settings"/>
             </CDropdownToggle>
@@ -43,15 +43,15 @@ const WidgetsDropdown = () => {
               <CDropdownItem>Something else here...</CDropdownItem>
               <CDropdownItem disabled>Disabled action</CDropdownItem>
             </CDropdownMenu>
-          </CDropdown>
+          </CDropdown> */}
         </CWidgetDropdown>
       </CCol>
 
       <CCol sm="6" lg="3">
         <CWidgetDropdown
           color="gradient-info"
-          header="9.823"
-          text="Members online"
+          header="14"
+          text="Total Bars"
           footerSlot={
             <ChartLineSimple
               pointed
@@ -65,7 +65,7 @@ const WidgetsDropdown = () => {
             />
           }
         >
-          <CDropdown>
+          {/* <CDropdown>
             <CDropdownToggle caret={false} color="transparent">
               <CIcon name="cil-location-pin"/>
             </CDropdownToggle>
@@ -75,15 +75,15 @@ const WidgetsDropdown = () => {
               <CDropdownItem>Something else here...</CDropdownItem>
               <CDropdownItem disabled>Disabled action</CDropdownItem>
             </CDropdownMenu>
-          </CDropdown>
+          </CDropdown> */}
         </CWidgetDropdown>
       </CCol>
 
       <CCol sm="6" lg="3">
         <CWidgetDropdown
           color="gradient-warning"
-          header="9.823"
-          text="Members online"
+          header="21"
+          text="Total night Spots"
           footerSlot={
             <ChartLineSimple
               className="mt-3"
@@ -97,7 +97,7 @@ const WidgetsDropdown = () => {
             />
           }
         >
-          <CDropdown>
+          {/* <CDropdown>
             <CDropdownToggle color="transparent">
               <CIcon name="cil-settings"/>
             </CDropdownToggle>
@@ -107,15 +107,15 @@ const WidgetsDropdown = () => {
               <CDropdownItem>Something else here...</CDropdownItem>
               <CDropdownItem disabled>Disabled action</CDropdownItem>
             </CDropdownMenu>
-          </CDropdown>
+          </CDropdown> */}
         </CWidgetDropdown>
       </CCol>
 
       <CCol sm="6" lg="3">
         <CWidgetDropdown
           color="gradient-danger"
-          header="9.823"
-          text="Members online"
+          header="40"
+          text="Users Of App"
           footerSlot={
             <ChartBarSimple
               className="mt-3 mx-3"
@@ -126,7 +126,7 @@ const WidgetsDropdown = () => {
             />
           }
         >
-          <CDropdown>
+          {/* <CDropdown>
             <CDropdownToggle caret className="text-white" color="transparent">
               <CIcon name="cil-settings"/>
             </CDropdownToggle>
@@ -136,7 +136,7 @@ const WidgetsDropdown = () => {
               <CDropdownItem>Something else here...</CDropdownItem>
               <CDropdownItem disabled>Disabled action</CDropdownItem>
             </CDropdownMenu>
-          </CDropdown>
+          </CDropdown> */}
         </CWidgetDropdown>
       </CCol>
     </CRow>

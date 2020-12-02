@@ -28,7 +28,7 @@ import {
     return dollars;
   }
   const { business } = props;
-  console.log("here the props", props);
+  // console.log("here the props", props);
 
    return(
      <div>

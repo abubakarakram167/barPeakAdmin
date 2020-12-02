@@ -39,7 +39,11 @@ export default () => {
         query:`
         query{
           allBusinesses{
-            placeId       
+            placeId,
+            category{
+              title,
+              type
+            }       
           }
         }
         `
@@ -50,10 +54,20 @@ export default () => {
       } });
 
       const alreadyAddedBusiness = getAllBusiness.data.data.allBusinesses
-      
-      let alreadyBusinessIds = alreadyAddedBusiness.map(business => business.placeId);
-      console.log("alreadyBusinessIds", alreadyBusinessIds)
-    
+      console.log("already Added Business", alreadyAddedBusiness);
+      console.log("selected Category", businessType);
+      let alreadyBusinessIds;
+      if(businessType === 'bar'){
+        alreadyBusinessIds= alreadyAddedBusiness
+                            .filter(business => "sub_bar" === business.category.type )
+                            .map(business => business.placeId)
+      }
+      else{
+        alreadyBusinessIds = alreadyAddedBusiness
+                              .filter(business => businessType === business.category.title )
+                              .map(business => business.placeId)
+      }
+      console.log("the already business ids", alreadyBusinessIds);
       const googleAlreadyAddedBusiness = res.data.filter((business)=>{
         return(alreadyBusinessIds.includes(business.place_id));
       })
