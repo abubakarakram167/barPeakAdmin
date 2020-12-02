@@ -31,7 +31,7 @@ export default (props) => {
     shortDescription: '',
     longDescription: '',
     category: '',
-    ageInterval: ''
+    ageInterval: 'young'
   });
   const [ratingData, setRatingData] = useState({
     fun: 5,
@@ -150,10 +150,7 @@ export default (props) => {
         } 
         console.log("the response after getting business", res); 
       }catch(err){
-        if(err.response.data){
-          console.log("the error", err.data.errors.length)
-        }
-        console.log("the error below", err)
+        console.log("the error below", err.response)
         
       }
     }

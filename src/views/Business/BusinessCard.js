@@ -30,7 +30,7 @@ import {
   }
   const { business } = props;
   // console.log("here the props", props);
-  console.log("the business", business)
+  // console.log("the business", business)
    return(
      <div>{!_.isEmpty(business.photos) &&
       <CCard>
@@ -58,55 +58,53 @@ import {
             ADD
           </CButton> */}
             
-          <CCardText>
-            <div>
-              <CRow>
-                <CCol style = {{ marginTop: 7, fontSize: 16 }} sm = {4} >
-                  Rating: 
-                </CCol>
-                <CCol sm = {8} style = {{ marginTop: 3 }} >
-                  <ReactStars
-                    count={5}
-                    onChange={ratingChanged}
-                    size={20}
-                    value = {business.rating}
-                    activeColor="#fcbe03"
-                  />
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
-                  Vicinty: 
-                </CCol>
-                <CCol sm = {8} style = {{ marginTop: 3 }} >
-                  <span>{business.vicinity}</span>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
-                  Types : 
-                </CCol>
-                <CCol sm = {8} style = {{ marginTop: 3 }} >
-                  { business.types.map((business)=>{
-                      return (
-                        <span>{ business},</span>
-                      )
-                    })
+          
+            <CRow>
+              <CCol style = {{ marginTop: 7, fontSize: 16 }} sm = {4} >
+                Rating: 
+              </CCol>
+              <CCol sm = {8} style = {{ marginTop: 3 }} >
+                <ReactStars
+                  count={5}
+                  onChange={ratingChanged}
+                  size={20}
+                  value = {business.rating}
+                  activeColor="#fcbe03"
+                />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
+                Vicinty: 
+              </CCol>
+              <CCol sm = {8} style = {{ marginTop: 3 }} >
+                <span>{business.vicinity}</span>
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
+                Types : 
+              </CCol>
+              <CCol sm = {8} style = {{ marginTop: 3 }} >
+                { business.types.map((business)=>{
+                    return (
+                      <span>{ business},</span>
+                    )
+                  })
 
-                  }
-                  
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {5} >
-                  Price Level: 
-                </CCol>
-                <CCol sm = {7} style = {{ marginTop: 3 }} >
-                  <span>{ renderDollars(business.price_level) }</span>
-                </CCol>
-              </CRow>      
-            </div>
-          </CCardText>
+                }
+                
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {5} >
+                Price Level: 
+              </CCol>
+              <CCol sm = {7} style = {{ marginTop: 3 }} >
+                <span>{ renderDollars(business.price_level) }</span>
+              </CCol>
+            </CRow>            
+          
         </CCardBody>
       </CCard>}
      </div>

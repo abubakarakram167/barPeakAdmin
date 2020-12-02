@@ -23,12 +23,13 @@ export default () => {
   const [notAddedBusiness, setNotAddedBusiness] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setCategory] = useState('');
-
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
   //For Testing
  
   const onChange = e => {
     setCategory(e.target.value);
-    getAllBusinesses(e.target.value)
+    getAllBusinesses(e.target.value, latitude, longitude)
   };
 
  
@@ -42,7 +43,7 @@ export default () => {
        longitude = -117.2545220;
       let radius = 10000;
       const res = await axiosApi.get(`http://localhost:3000/getGoogleMapsResults?business_type=${businessType}&lat=${latitude}&lon=${longitude}&radius=${radius}`);
-      console.log("the response", res)
+
       const { token } = await getUserData();
       const body = {
         query:`
@@ -66,6 +67,7 @@ export default () => {
       console.log("already Added Business", alreadyAddedBusiness);
       console.log("selected Category", businessType);
       let alreadyBusinessIds;
+      const allBusinessIdsForNot = alreadyAddedBusiness.map( business => business.placeId);
       if(businessType === 'bar'){
         alreadyBusinessIds= alreadyAddedBusiness
                             .filter(business => "sub_bar" === business.category.type )
@@ -77,13 +79,17 @@ export default () => {
                               .map(business => business.placeId)
       }
       console.log("the already business ids", alreadyBusinessIds);
+
       const googleAlreadyAddedBusiness = res.data.filter((business)=>{
         return(alreadyBusinessIds.includes(business.place_id));
       })
-
+      
       const notgoogleAlreadyAddedBusiness = res.data.filter((business)=>{
-        return(!alreadyBusinessIds.includes(business.place_id));
+        if(allBusinessIdsForNot.includes(business.place_id))
+          return false;
+        return true
       })
+      
 
       setAddedBusinesses(googleAlreadyAddedBusiness);
       setNotAddedBusiness(notgoogleAlreadyAddedBusiness);
@@ -116,14 +122,18 @@ export default () => {
         } });
         setCategories(res.data.data.getCategories)
         setCategory(res.data.data.getCategories[0].title)
+        
         navigator.geolocation.getCurrentPosition(function(position) {
-          // setLatitude(position.coords.latitude)
-          // setLongitude(position.coords.longitude)
+            console.log("the inn", position)
+           setLatitude(position.coords.latitude)
+           setLongitude(position.coords.longitude)
           getAllBusinesses(res.data.data.getCategories[0].title, position.coords.latitude, position.coords.longitude)
-        });
-       
-      }catch(err){
+        })
 
+         
+                
+      }catch(err){
+        console.log("the roor", err)
       }  
     }
     fetchData();
