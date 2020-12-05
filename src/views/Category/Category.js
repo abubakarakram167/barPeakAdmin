@@ -53,7 +53,7 @@ export default () => {
               if(category.type === "main_category"){
               return(
                 <CCol sm="4" >
-                  <Card category = {category}   />
+                  <Card main = {true} category = {category}   />
                 </CCol>
               );
             }
@@ -74,7 +74,7 @@ export default () => {
               if(category.type === "sub_bar"){
               return(
                 <CCol sm="4" >
-                  <Card category = {category} />
+                  <Card main = {false} category = {category} />
                 </CCol>
               );
             }

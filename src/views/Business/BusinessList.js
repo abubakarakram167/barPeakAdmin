@@ -19,7 +19,7 @@ export default (props) => {
               if(business.business_status === "OPERATIONAL"){
               return(
                 <CCol sm="4" >
-                  <Card showLink = {true} business = {business} update = { props.update }  />
+                  <Card history = {props.history} category = {props.category} showLink = {true} business = {business} update = { props.update }  />
                 </CCol>
               );
             }

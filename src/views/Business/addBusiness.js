@@ -13,10 +13,10 @@ useEffect(() => {
 
 }, []);
 
-  const {place_id} = props.match.params
+  const {place_id, category_id} = props.match.params
   return(
   <div>
-    <BusinessAddForm placeId = { place_id } history = {props.history}  />  
+    <BusinessAddForm placeId = { place_id } categoryId = { category_id } history = {props.history}  />  
   </div>
   )
 }

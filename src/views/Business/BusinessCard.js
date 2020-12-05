@@ -14,9 +14,14 @@ import {
  import { useState, useEffect } from 'react';
  import { Link } from 'react-router-dom'
  import _, { map } from 'underscore';
-
+ import { Popconfirm, message } from 'antd';
+ import axios from '../../api';
+ import { getUserData } from '../../localStorage';
+ import Modal from '../../components/Modal';
+ 
  export default (props) => {
-
+  const [showPopup, setShowPopup] = useState(false);
+  const [success, setSuccess] = useState(true); 
   const ratingChanged = (newRating) => {
     console.log(newRating);
   };
@@ -28,24 +33,70 @@ import {
     }
     return dollars;
   }
-  const { business } = props;
-  // console.log("here the props", props);
-  // console.log("the business", business)
+  const confirm = async (placeId) =>{
+    const { token } = await getUserData();
+    const body = {
+      query:` 
+      mutation{
+        deleteBusiness(placeId: "${placeId}")
+      }
+      `
+    }
+    try{
+      const res = await axios.post(`graphql?`,body,{ headers: {
+        'Authorization': `Bearer ${token}`
+      } })
+      if(res){
+        setShowPopup(true)
+      }
+       
+      console.log("the response after deleting", res);
+    }catch(error){
+
+    }
+  }
+  
+  const cancel =(e) => {
+    console.log(e);
+    message.error('Click on No');
+  }
+  const { business, category } = props;
+  const photoUrl = !_.isEmpty(business.photos) ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${business.photos[0].photo_reference}&key=AIzaSyD9CLs9poEBtI_4CHd5Y8cSHklQPoCi6NM` : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png";
    return(
-     <div>{!_.isEmpty(business.photos) &&
+     <div>
       <CCard>
         <CCardBody>
           <CCardTitle style = {{ height: 20 }} >
             {business.name}
           </CCardTitle>
           <img 
-            src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${business.photos[0].photo_reference}&key=AIzaSyD9CLs9poEBtI_4CHd5Y8cSHklQPoCi6NM`}
+            src={photoUrl}
             alt="new"
             style = {{ width: "100%", height: 200, position: 'relative' }}
           />
-          { props.showLink && !props.update ?
-            <Link className = "business-card" to={`addBusiness/${business.place_id}`}>ADD</Link>
-            : <Link className = "business-card" to={`updateBusiness/${business.place_id}`}>Edit</Link>
+          { props.showLink && !props.update &&
+            <Link className = "business-card-add" to={`addBusiness/${business.place_id}/category/${category}`} >ADD</Link>
+          } 
+
+          {  props.showLink && props.update &&
+            (<div className = "button-grid-business" >
+              <div>
+                <Link className = "business-card" to={`updateBusiness/${business.place_id}/category/${category}`}>Edit</Link>
+              </div>
+              <div style = {{ marginTop: 10 }} >
+              <Popconfirm
+                title="Are you sure to delete this task?"
+                onConfirm={() =>confirm(business.place_id)}
+                onCancel={cancel}
+                okText="Yes"
+                cancelText="No"
+              >
+                <CButton className = "delete-button" >
+                  Delete
+                </CButton>
+              </Popconfirm>
+              </div>
+            </div>)
           }
           {/* <CButton
             className="m-2"
@@ -73,15 +124,15 @@ import {
                 />
               </CCol>
             </CRow>
-            <CRow>
+            <CRow style = {{ maxHeight: 80 }}>
               <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
                 Vicinty: 
               </CCol>
               <CCol sm = {8} style = {{ marginTop: 3 }} >
-                <span>{business.vicinity}</span>
+                <span>{business.vicinity.substr(0,30)}</span>
               </CCol>
             </CRow>
-            <CRow>
+            <CRow style = {{ minHeight: 80 }} >
               <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
                 Types : 
               </CCol>
@@ -103,10 +154,13 @@ import {
               <CCol sm = {7} style = {{ marginTop: 3 }} >
                 <span>{ renderDollars(business.price_level) }</span>
               </CCol>
+            </CRow>
+            <CRow>
+              <Modal delete = {true} showPopup = {showPopup} success = {success} message = {"Business Deleted SuccessFully"} />
             </CRow>            
           
         </CCardBody>
-      </CCard>}
+      </CCard>
      </div>
    )
  }

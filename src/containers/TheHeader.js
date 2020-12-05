@@ -10,8 +10,13 @@ import {
   CSubheader,
   CBreadcrumbRouter,
   CLink,
-  CButton
+  CButton,
+  CDropdownToggle,
+  CDropdownItem,
+  CDropdown,
+  CDropdownMenu
 } from '@coreui/react'
+import { Link } from 'react-router-dom'
 import CIcon from '@coreui/icons-react'
 import './header.css'
 import { clearStorage } from '../localStorage';
@@ -98,7 +103,17 @@ const TheHeader = (props) => {
               <CIcon name="cil-graph" alt="Dashboard" />&nbsp;Dashboard
             </CLink>
             <CLink className="c-subheader-nav-link" href="#">
-              <CIcon name="cil-settings" alt="Settings" />&nbsp;Settings
+              <CIcon name="cil-settings" alt="Settings" />
+              <div>
+                <CDropdown className="mt-2">
+                  <CDropdownToggle style = {{padding: 8, fontSize: 12 }} caret color="info">
+                    Settings
+                  </CDropdownToggle>
+                  <CDropdownMenu>
+                    <CDropdownItem header><Link to={`/user/updateRadius`} >Update Radius</Link></CDropdownItem>
+                  </CDropdownMenu>
+                </CDropdown>
+              </div>
             </CLink>
           </div>
       </CSubheader>

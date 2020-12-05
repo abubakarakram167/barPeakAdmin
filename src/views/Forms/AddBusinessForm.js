@@ -181,6 +181,19 @@ export default (props) => {
         const allSpecificCategories = res.data.data.getCategories
         setGoogleDetailData(getSingleData.data)
         setCategories(allSpecificCategories);
+        
+        const specificCategory = allSpecificCategories.filter( category => category._id === props.categoryId )[0];
+        const barCategory = allSpecificCategories.filter( category => category.type === "sub_bar" )[0];
+        console.log("the specific Catgoery", specificCategory);
+        if (specificCategory.title === "bar"){
+          setBar(true)
+        }
+        else{
+          setBar(false)
+        }
+          
+        setFormData({ category : specificCategory._id, barCategory: barCategory._id, ageInterval: "young" })
+        
       }catch(err){
         console.log("the error", err);
       }
@@ -267,7 +280,8 @@ export default (props) => {
                 <select 
                   onChange = {onChange}
                   name = "category" 
-                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }}
+                  value = {!_.isEmpty(formData) &&formData.category}  
                 >
                   { allCateogories.map((category)=>{
                       if(category.type === "main_category"){
@@ -287,7 +301,8 @@ export default (props) => {
                   <select 
                     onChange = { onChange } 
                     name = "barCategory"
-                    style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                    style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }}
+                    value = { !_.isEmpty(formData) && formData.barCategory &&formData.barCategory } 
                   >
                     { allCateogories.map((category)=>{
                         if(category.type === "sub_bar"){

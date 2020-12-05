@@ -7,8 +7,10 @@ import {
   CModalFooter,
  } from '@coreui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useHistory } from 'react-router-dom';
 
 export default (props) => {
+const history = useHistory();
 
 const [modal, setModal] = useState(false);
 
@@ -36,7 +38,7 @@ const [modal, setModal] = useState(false);
           <span style = {{ textAlign: 'center', fontSize: 20, fontWeight: 500 }} >{props.message}</span> 
         </CModalBody>
         <CModalFooter>
-          <CButton color="success" onClick = {()=> {   props.history.push('/business')  }} >Ok</CButton>
+          <CButton color="success" onClick = {()=> {  props.delete ? history.push('/') :history.push('/business')  }} >Ok</CButton>
         </CModalFooter>
       </CModal>
     </div>

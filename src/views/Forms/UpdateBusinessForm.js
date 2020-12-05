@@ -95,7 +95,7 @@ export default (props) => {
 
   const submitForm = async () => {
     const { token } = await getUserData();
-    const category = isBar ? formData.barCategory : formData.category;
+    const category = isBar ? formData.barCategory._id : formData.category._id;
     
     // console.log("at submission", formData);
     // console.log("at submission", ratingData)
