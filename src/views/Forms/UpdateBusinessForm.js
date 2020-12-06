@@ -191,7 +191,7 @@ export default (props) => {
         const res = await axios.post(`graphql?`,body,{ headers: {
           'Authorization': `Bearer ${token}`
         } });
-        const getSingleGoogleData = await axios.get(`http://localhost:3000/getSinglePlaceResult?place_id=${props.placeId}`);
+        const getSingleGoogleData = await axios.get(`getSinglePlaceResult?place_id=${props.placeId}`);
         const getSingleBusinessData = await axios.post(`graphql?`,singleBusinessBody,{ headers: {
           'Authorization': `Bearer ${token}`
         }});
