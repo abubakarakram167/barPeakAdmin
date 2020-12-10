@@ -21,6 +21,7 @@ import { ToastContainer } from 'react-toastify';
 import { MDBNotification } from "mdbreact";
 import { Alert } from 'antd';
 import Modal from '../../components/Modal';
+import { Checkbox, Row, Col } from 'antd';
 
 export default (props) => {
   
@@ -45,19 +46,31 @@ export default (props) => {
   const [showPopup, setShowPopup] = useState(false);
   const [success, setSuccess] = useState(true); 
 
+  const onChangeCategory = (event) => {
+    
+    const specificCategory = allCateogories.filter(category => event.includes(category._id)).map(category => category._id)
+    const barCategoryTitle = allCateogories.filter(category => event.includes(category._id)).map(category => category.title)
+    
+    console.log("the specific category", specificCategory);
+    if( barCategoryTitle.includes("bar") )
+      setBar(true)
+    else
+      setBar(false) 
+    
+    setFormData(prevState => ({ ...prevState, category: specificCategory.toString() }));
+  }
+
   const onChange = (event) => {
+    console.log("event.target", event)
     const { name, value } = event.target;
     
-    if(name === "category"){
-      const specificCategory = allCateogories.filter(category => category._id === value)[0]
-      console.log("the specific category", specificCategory);
-      if(specificCategory.title === "bar")
-        setBar(true)
-      else
-        setBar(false) 
+    if(name === "barCategory"){
+      let selectedCategories = formData.category;
+      selectedCategories = selectedCategories + ',' + value;
+      setFormData(prevState => ({ ...prevState, category: selectedCategories }));   
     }
-
-    setFormData(prevState => ({ ...prevState, [name]: value }));
+    else
+      setFormData(prevState => ({ ...prevState, [name]: value }));
   }
 
   
@@ -74,16 +87,6 @@ export default (props) => {
       console.log("title")
       isValid = false;
       errors["title"] = "Please input title"
-    }
-    if(formData.shortDescription === "" || formData.shortDescription === undefined){
-      console.log("short")
-      isValid = false;
-      errors["shortDescription"] = "Please input short Description"
-    }
-    if(formData.longDescription === "" || formData.longDescription === undefined){
-      console.log("long")
-      isValid = false;
-      errors["longDescription"] = "Please input long Description"
     }
     if(formData.ageInterval === "" || formData.ageInterval === undefined){
       isValid = false;
@@ -110,18 +113,17 @@ export default (props) => {
 
   const submitForm = async () => {
     const { token } = await getUserData();
-    const category = isBar ? formData.barCategory : formData.category;
+    
 
-    console.log("the form data", formData);
-    console.log("the rating data", ratingData)
+    debugger
 
     if(validate()){
       const body = {
         query:` 
         mutation{
           createBusiness(businessInput: {
-              category: "${category}",
-              title: "${formData.title}",
+              category: "${formData.category}",
+              name: "${formData.title}",
               placeId: "${props.placeId}",
               ageInterval: "${formData.ageInterval}"
               rating:{
@@ -130,15 +132,17 @@ export default (props) => {
                 girlToGuyRatio: ${ratingData.girlToGuyRatio}
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
-              }
-              longDescription: "${formData.longDescription}",
-              shortDescription: "${ formData.shortDescription}"
-      
+              },
+              photoReference: "${googleDetailData.photoReference}",
+              googleRating: ${googleDetailData.rating ? googleDetailData.rating : 3},
+              address: "${googleDetailData.formatted_address}",
+              priceLevel: ${googleDetailData.price_level? googleDetailData.price_level : 2 }
           })
           {
-            title
+            name
           }
-        }`
+        }
+        `
       }
       try{
         const res = await axios.post(`graphql?`,body,{ headers: {
@@ -179,7 +183,15 @@ export default (props) => {
         const getSingleData = await axios.get(`getSinglePlaceResult?place_id=${props.placeId}`);
         // console.log("the google detail data", getSingleData)
         const allSpecificCategories = res.data.data.getCategories
-        setGoogleDetailData(getSingleData.data)
+        console.log("the single data", getSingleData)
+        let singleData = {...getSingleData.data, 
+          address: getSingleData.data.vicinity,
+          photoReference: getSingleData.data.photos && getSingleData.data.photos[0].photo_reference,
+          googleRating: getSingleData.data.rating,
+          types: getSingleData.data.types.map(type => type)
+        }
+        console.log("the single data", singleData)
+        setGoogleDetailData(singleData)
         setCategories(allSpecificCategories);
         
         const specificCategory = allSpecificCategories.filter( category => category._id === props.categoryId )[0];
@@ -192,7 +204,7 @@ export default (props) => {
           setBar(false)
         }
           
-        setFormData({ category : specificCategory._id, barCategory: barCategory._id, ageInterval: "young" })
+        setFormData({ ageInterval: "young", title: singleData.name })
         
       }catch(err){
         console.log("the error", err);
@@ -249,7 +261,7 @@ export default (props) => {
                 {error.title &&  <Alert message="Please title is required" type="error" />  }
                 <CFormText className="help-block">Please enter your Title</CFormText>
               </CFormGroup>
-              <CFormGroup>
+              {/* <CFormGroup>
                 <CLabel htmlFor="nf-password">Short Description</CLabel>
                 <CTextarea
                   name="shortDescription"
@@ -274,8 +286,8 @@ export default (props) => {
                 />
                  {error.longDescription &&  <Alert message="Long Description is required" type="error" />  }
                 <CFormText className="help-block">Please enter Long Description</CFormText>
-              </CFormGroup>
-              <CFormGroup>
+              </CFormGroup> */}
+              {/* <CFormGroup>
                 <CLabel >Category</CLabel>
                 <select 
                   onChange = {onChange}
@@ -292,6 +304,25 @@ export default (props) => {
                     })
                   }
                 </select>
+                {error.category &&  <Alert message="Select Atleast one category" type="error" />  }
+                <CFormText className="help-block">Please Select Category</CFormText>
+              </CFormGroup> */}
+               <CFormGroup>
+                <CLabel >Category</CLabel>
+                <Checkbox.Group style={{ width: '100%' }} name = "category" onChange={onChangeCategory}>
+                  <Row>
+                    { allCateogories.map((category)=>{
+                          if(category.type === "main_category"){
+                            return(
+                              <Col span={8}>
+                                <Checkbox name= "category" value={category._id}>{category.title}</Checkbox>
+                              </Col>
+                            );
+                          }  
+                        })
+                      }
+                  </Row>
+                 </Checkbox.Group>
                 {error.category &&  <Alert message="Select Atleast one category" type="error" />  }
                 <CFormText className="help-block">Please Select Category</CFormText>
               </CFormGroup>

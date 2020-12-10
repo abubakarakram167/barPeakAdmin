@@ -61,7 +61,8 @@ import {
     message.error('Click on No');
   }
   const { business, category } = props;
-  const photoUrl = !_.isEmpty(business.photos) ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${business.photos[0].photo_reference}&key=AIzaSyD9CLs9poEBtI_4CHd5Y8cSHklQPoCi6NM` : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png";
+  console.log("the bussiness prop get", business)
+  const photoUrl = business.photoReference ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${business.photoReference}&key=AIzaSyD9CLs9poEBtI_4CHd5Y8cSHklQPoCi6NM` : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png";
    return(
      <div>
       <CCard>
@@ -75,18 +76,18 @@ import {
             style = {{ width: "100%", height: 200, position: 'relative' }}
           />
           { props.showLink && !props.update &&
-            <Link className = "business-card-add" to={`addBusiness/${business.place_id}/category/${category}`} >ADD</Link>
+            <Link className = "business-card-add" to={`addBusiness/${business.placeId}/category/${category}`} >ADD</Link>
           } 
 
           {  props.showLink && props.update &&
             (<div className = "button-grid-business" >
               <div>
-                <Link className = "business-card" to={`updateBusiness/${business.place_id}/category/${category}`}>Edit</Link>
+                <Link className = "business-card" to={`updateBusiness/${business.placeId}/category/${category}`}>Edit</Link>
               </div>
               <div style = {{ marginTop: 10 }} >
               <Popconfirm
                 title="Are you sure to delete this task?"
-                onConfirm={() =>confirm(business.place_id)}
+                onConfirm={() =>confirm(business.placeId)}
                 onCancel={cancel}
                 okText="Yes"
                 cancelText="No"
@@ -119,7 +120,7 @@ import {
                   count={5}
                   onChange={ratingChanged}
                   size={20}
-                  value = {business.rating}
+                  value = {business.googleRating}
                   activeColor="#fcbe03"
                 />
               </CCol>
@@ -129,7 +130,7 @@ import {
                 Vicinty: 
               </CCol>
               <CCol sm = {8} style = {{ marginTop: 3 }} >
-                <span>{business.vicinity.substr(0,30)}</span>
+                 <span>{business.address.substr(0,30) }</span>
               </CCol>
             </CRow>
             <CRow style = {{ minHeight: 80 }} >
@@ -152,7 +153,7 @@ import {
                 Price Level: 
               </CCol>
               <CCol sm = {7} style = {{ marginTop: 3 }} >
-                <span>{ renderDollars(business.price_level) }</span>
+                <span>{ renderDollars(business.priceLevel) }</span>
               </CCol>
             </CRow>
             <CRow>

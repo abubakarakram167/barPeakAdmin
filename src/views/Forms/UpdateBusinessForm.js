@@ -23,6 +23,7 @@ import { MDBNotification } from "mdbreact";
 import { message, Button } from 'antd';
 import Modal from '../../components/Modal';
 import { Alert } from 'antd';
+import { Checkbox, Row, Col } from 'antd';
 export default (props) => {
   
   const [allCateogories, setCategories]=useState([]);
@@ -33,7 +34,10 @@ export default (props) => {
   const [showPopup, setShowPopup] = useState(false);
   const [success, setSuccess] = useState(true); 
   const [error, setError] = useState({})
+  const [afterTime, setAfterTime] = useState(false);
+  const selectedcategoryIds = []
 
+  setTimeout(()=> setAfterTime(true), 5000)
 
   const onChange = (event) => {
     const { name, value } = event.target;
@@ -47,6 +51,25 @@ export default (props) => {
     }
      
     setFormData(prevState => ({ ...prevState, [name]: value }));
+  }
+
+  const onChangeCategory = (event) => {
+    const {value} = event.target;
+    if(!selectedcategoryIds.includes(value))
+      selectedcategoryIds.push(value)
+    else
+    selectedcategoryIds = selectedcategoryIds.filter( categoryId => categoryId !== value );    
+    console.log("selected categ", selectedcategoryIds)
+    const specificCategory = allCateogories.filter(category =>selectedcategoryIds.includes(category._id)).map(category => category._id)
+    const barCategoryTitle = allCateogories.filter(category => selectedcategoryIds.includes(category._id)).map(category => category.title)
+    
+    console.log("the specific category", specificCategory);
+    if( barCategoryTitle.includes("bar") )
+      setBar(true)
+    else
+      setBar(false) 
+    
+    setFormData(prevState => ({ ...prevState, category: specificCategory.toString() }));
   }
 
   
@@ -95,20 +118,16 @@ export default (props) => {
 
   const submitForm = async () => {
     const { token } = await getUserData();
-    const category = isBar ? formData.barCategory._id : formData.category._id;
     
-    // console.log("at submission", formData);
-    // console.log("at submission", ratingData)
-    // console.log("the category", category)
-
+    debugger;
     if(validate()){
       console.log("inn")
       const body = {
         query:` 
         mutation{
-          updateBusiness(businessInput: {
-              category: "${category}",
-              title: "${formData.title}",
+          createBusiness(businessInput: {
+              category: "${formData.category}",
+              name: "${formData.title}",
               placeId: "${props.placeId}",
               ageInterval: "${formData.ageInterval}"
               rating:{
@@ -117,15 +136,17 @@ export default (props) => {
                 girlToGuyRatio: ${ratingData.girlToGuyRatio}
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
-              }
-              longDescription: "${formData.longDescription}",
-              shortDescription: "${ formData.shortDescription}"
-      
+              },
+              photoReference: "${googleDetailData.photoReference}",
+              googleRating: ${googleDetailData.rating ? googleDetailData.rating : 3},
+              address: "${googleDetailData.formatted_address}",
+              priceLevel: ${googleDetailData.price_level? googleDetailData.price_level : 2 }
           })
           {
-            title
+            name
           }
-        }`
+      }
+        `
       }
       try{
         const res = await axios.post(`graphql?`,body,{ headers: {
@@ -173,9 +194,6 @@ export default (props) => {
                      imageUrl
                      _id
                  },
-                 shortDescription,
-                 longDescription,
-                 title,
                  ageInterval,
                  rating{
                      fun,
@@ -183,7 +201,8 @@ export default (props) => {
                      girlToGuyRatio,
                      difficultyGettingIn,
                      difficultyGettingDrink
-                 }
+                 },
+                 address
              }
         }`
       }
@@ -195,46 +214,52 @@ export default (props) => {
         const getSingleBusinessData = await axios.post(`graphql?`,singleBusinessBody,{ headers: {
           'Authorization': `Bearer ${token}`
         }});
+        let singleData = {...getSingleGoogleData.data, 
+          address: getSingleGoogleData.data.vicinity,
+          photoReference: getSingleGoogleData.data.photos && getSingleGoogleData.data.photos[0].photo_reference,
+          googleRating: getSingleGoogleData.data.rating,
+          types: getSingleGoogleData.data.types.map(type => type)
+        }
         const singleBusiness = getSingleBusinessData.data.data.getSingleBusiness;
         const allSpecificCategories = res.data.data.getCategories
-        if(singleBusiness.category.type === "sub_bar"){
-          setBar(true)
-          singleBusiness.barCategory = singleBusiness.category
-          singleBusiness.category = allSpecificCategories.filter(category => category.title === 'bar')[0]
-        }
-        console.log("the single business detail data", singleBusiness)
+
+        singleBusiness.category.map((category)=>{
+          selectedcategoryIds.push(category._id)
+          if(category.title === 'bar')
+            setBar(true)  
+        })
+
+        // console.log("the single business detail data", singleBusiness)
         setRatingData(singleBusiness.rating);
+        singleBusiness.category = singleBusiness.category.map(category => category._id) 
         setFormData(singleBusiness)
-        setGoogleDetailData(getSingleGoogleData.data)
+
+        setGoogleDetailData(singleData)
         setCategories(allSpecificCategories);
       }catch(err){
-        console.log("the error", err);
+        console.log("the error", err.response);
       }
     }
     fetchData();
   }, []);
 
+  const isSelected = (categoryId) => {
+    // console.log("the category", categoryId)
+    // console.log("the formdata", formData)
+    let formDataCategoryIds = formData.category
+    // console.log("forma data", formDataCategoryIds)
+    return formDataCategoryIds.includes(categoryId);
+  }
+
     //  console.log("the google detail data", googleDetailData)
-   console.log("form Data", formData)
-   console.log("the rating Data", ratingData);
+  //  console.log("form Data", formData)
+  //  console.log("the rating Data", ratingData);
 
   return(
     <div>
       <CContainer style = {{ width: "50%" }}  >
         <CRow>
           <Modal showPopup = {showPopup} success = {success} history = {props.history} message = {"Business Updated SuccessFully"} />
-        </CRow>
-        <CRow>
-          {/* <MDBNotification
-            show = {showAlert}
-            fade
-            autohide = {10000}
-            icon="envelope"
-            iconClassName="green-text"
-            title="Success"
-            message="Business Sccessfull Updated"
-            text="1min ago"
-          /> */}
         </CRow>
         <CRow>
           <CCol sm = "12" >
@@ -260,7 +285,7 @@ export default (props) => {
                 {error.title &&  <Alert message="Please title is required" type="error" />  }
                 <CFormText className="help-block">Please enter your Title</CFormText>
               </CFormGroup>
-              <CFormGroup>
+              {/* <CFormGroup>
                 <CLabel htmlFor="nf-password">Short Description</CLabel>
                 <CTextarea
                   name="shortDescription"
@@ -304,6 +329,29 @@ export default (props) => {
                   }
                 </select>
                 {error.category &&  <Alert message="category is required" type="error" />  }
+                <CFormText className="help-block">Please Select Category</CFormText>
+              </CFormGroup> */}
+              <CFormGroup>
+                <CLabel >Category</CLabel>
+               
+                  <Row>
+                    { allCateogories.map((category)=>{
+                          if(category.type === "main_category"){
+                            return(
+                              <Col span={8}>
+                                <label>
+                                <input type="checkbox" name = "category" value = { category._id } defaultChecked={isSelected(category._id)} onChange={onChangeCategory} />
+                                {/* <Checkbox name= "category" Checked = { afterTime } value={category._id}>{category.title}</Checkbox> */}
+                                 {category.title}
+                                </label>
+                              </Col>
+                            );
+                          }  
+                        })
+                      }
+                  </Row>
+                
+                {error.category &&  <Alert message="Select Atleast one category" type="error" />  }
                 <CFormText className="help-block">Please Select Category</CFormText>
               </CFormGroup>
               { isBar &&

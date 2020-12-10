@@ -15,14 +15,12 @@ export default (props) => {
     <div>
       <CContainer>
         <CRow style = {{ marginTop: 10 }} >
-          { businesses.length && businesses.map((business)=>{
-              if(business.business_status === "OPERATIONAL"){
-              return(
-                <CCol sm="4" >
-                  <Card history = {props.history} category = {props.category} showLink = {true} business = {business} update = { props.update }  />
-                </CCol>
-              );
-            }
+          { businesses.length && businesses.map((business)=>{      
+            return(
+              <CCol sm="4" >
+                <Card history = {props.history} category = {props.category} showLink = {true} business = {business} update = { props.update }  />
+              </CCol>
+            );           
             })
           } 
         </CRow>

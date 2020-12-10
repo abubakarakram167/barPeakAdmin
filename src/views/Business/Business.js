@@ -18,6 +18,7 @@ import { Radio } from 'antd';
 import './business.css'
 import Category from '../Category/Category';
 import Loader from 'react-loader-spinner'
+import SearchField from "react-search-field";
 
 export default (props) => {  
   const [showLoader, setShowLoader] = useState(false);
@@ -29,6 +30,8 @@ export default (props) => {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [radius, setRadius] = useState('');
+  const [all, setAllBusinesses] = useState([]);
+  const [searchValue, setSearchValue] = useState('');
   //For Testing
  
   const onChange = e => {
@@ -37,16 +40,33 @@ export default (props) => {
     setCategoryId(specificCategory)
     getAllBusinesses(e.target.value, latitude, longitude, radius)
   };
+
+  const getAllBusinessCategories = (categories, isBar) =>{
+    if(isBar){
+      return categories.map((category)=>{
+        return category.type;
+      })
+    }
+    else{
+      return categories.map((category)=>{
+        return category.title;
+      })
+    }
+    
+  }
  
    
 
   const getAllBusinesses = async(businessType, latitude, longitude, radius) => {
     try{ 
+      console.log("after empty search", businessType)
       console.log("Latitude ", latitude.toFixed(4));
       console.log("Longitude is :", longitude.toFixed(4));
       //For testing
-      // latitude =   32.7970465;
-      // longitude =  -117.2545220;
+       latitude =   32.7970465;
+       longitude =  -117.2545220;
+      // latitude =   31.4737;
+      // longitude =  74.3834;
       // radius = 2000;
       setShowLoader(true)
       console.log(`the latittude ${latitude.toFixed(4)} and longitude ${longitude.toFixed(4)} and radius is ${radius} and place is ${businessType} `)
@@ -57,11 +77,26 @@ export default (props) => {
         query:`
         query{
           allBusinesses{
-            placeId,
-            category{
-              title,
-              type
-            }       
+              name
+              rating{
+                fun
+                crowd
+                girlToGuyRatio
+                difficultyGettingIn
+                difficultyGettingDrink
+              }
+              category{
+               title
+               type
+               _id
+              }
+              ageInterval,
+              googleRating,
+              photoReference,
+              googleRating,
+              address,
+              placeId
+      
           }
         }
         `
@@ -71,35 +106,46 @@ export default (props) => {
         'Authorization': `Bearer ${token}`
       } });
       const alreadyAddedBusiness = getAllBusiness.data.data.allBusinesses
-      let alreadyBusinessIds;
+      setAllBusinesses(alreadyAddedBusiness);
+      
       const allBusinessIdsForNot = alreadyAddedBusiness.map( business => business.placeId);
-      if(businessType === 'bar'){
-        alreadyBusinessIds= alreadyAddedBusiness
-                            .filter(business => "sub_bar" === business.category.type )
-                            .map(business => business.placeId)
-      }
-      else{
-        alreadyBusinessIds = alreadyAddedBusiness
-                              .filter(business => businessType === business.category.title )
-                              .map(business => business.placeId)
-      }
+     
+      const alreadyBusinessIds= alreadyAddedBusiness
+                            .filter((business) =>  getAllBusinessCategories(business.category).includes(businessType) ).map(business=>{
+                              return{
+                                ...business,
+                                types: getAllBusinessCategories(business.category)
+                              }
+                            })
+
+                            
+      console.log("already added in system", alreadyBusinessIds)
+      
     
-      const googleAlreadyAddedBusiness = res.data.filter((business)=>{
-        return(alreadyBusinessIds.includes(business.place_id));
-      })
+      // const googleAlreadyAddedBusiness = res.data.filter((business)=>{
+      //   return(alreadyBusinessIds.includes(business.place_id));
+      // })
       
       const notgoogleAlreadyAddedBusiness = res.data.filter((business)=>{
         if(allBusinessIdsForNot.includes(business.place_id))
           return false;
         return true
+      }).map(business => {
+        return {...business,
+          address: business.vicinity,
+          photoReference: business.photos && business.photos[0].photo_reference,
+          googleRating: business.rating,
+          types: business.types.map(type => type),
+          placeId: business.place_id
+        }
       })
       
       setShowLoader(false)
-      setAddedBusinesses(googleAlreadyAddedBusiness);
+      setAddedBusinesses(alreadyBusinessIds);
       setNotAddedBusiness(notgoogleAlreadyAddedBusiness);
 
     }catch(err){
-      console.log("the error", err.response)
+      console.log("the error", err)
     }  
   }
 
@@ -157,6 +203,46 @@ export default (props) => {
     fetchData();
   }, []);
 
+  const onSearch = (e) => {
+    console.log("the search", e);
+    if(e === ''){
+      getAllBusinesses(selectedCategory, latitude, longitude, radius)
+    }
+    setSearchValue(e);
+  }
+  const getSearchResults = async() => {
+    const res = await axios.get(`/getSearchTextResult?search_text=${searchValue}`);
+    let allBusinesses = all.map(business => business.placeId)
+
+    const searchResultsnotAdded = res.data.filter((business)=>{
+      return(! allBusinesses.includes(business.place_id));
+    }).map((business)=> {
+      return {...business,
+        address: business.formatted_address,
+        photoReference: business.photos && business.photos[0].photo_reference,
+        googleRating: business.rating,
+        types: business.types.map(type => type),
+        placeId: business.place_id
+      }
+    })
+    const searchResultsAlwaysAdded = res.data.filter((business)=>{
+      return(allBusinesses.includes(business.place_id))
+    }).map(business => {
+      return {...business,
+        address: business.formatted_address,
+        photoReference: business.photos && business.photos[0].photo_reference,
+        googleRating: business.rating,
+        types: business.types.map(type => type),
+        placeId: business.placeId
+      }
+    })
+
+    // console.log("the search Results after filter", searchResults.length)
+
+    setNotAddedBusiness(searchResultsnotAdded);
+    setAddedBusinesses(searchResultsAlwaysAdded);
+
+  }
 
   return (
     <div>
@@ -173,6 +259,16 @@ export default (props) => {
             </CNavLink>
           </CNavItem>
         </CNav>
+        <CRow>
+          <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
+            <SearchField
+              placeholder="Search By Name"
+              onChange={onSearch}
+              classNames="test-class"
+              onSearchClick = { ()=> {  getSearchResults() } }
+            />
+          </CCol>
+        </CRow>
         <CRow>
           <CCol className = "business-type-container" sm = {12} >
           <div className = "business-type-text" >What are you trying to ADD ?</div>  
