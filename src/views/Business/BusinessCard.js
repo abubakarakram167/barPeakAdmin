@@ -76,7 +76,14 @@ import {
             style = {{ width: "100%", height: 200, position: 'relative' }}
           />
           { props.showLink && !props.update &&
-            <Link className = "business-card-add" to={`addBusiness/${business.placeId}/category/${category}`} >ADD</Link>
+            <div className = "button-grid-business" >
+              <div>
+                <Link className = "business-card-add" to={`addBusiness/${business.placeId}/category/${category}/auto/true`} >ADD</Link>
+              </div>
+              <div style = {{ position: 'relative', top: 40 }} >
+                <Link className = "business-card-edit" to={`addBusiness/${business.placeId}/category/${category}/auto/false`} >Edit</Link>
+              </div>
+            </div>
           } 
 
           {  props.showLink && props.update &&
@@ -138,11 +145,11 @@ import {
                 Types : 
               </CCol>
               <CCol sm = {8} style = {{ marginTop: 3 }} >
-                { business.types.map((business)=>{
+                { business.types ? business.types.map((business)=>{
                     return (
                       <span>{ business},</span>
                     )
-                  })
+                  }) : " Not Categorized Yet "
 
                 }
                 

@@ -24,6 +24,7 @@ export default (props) => {
   const [showLoader, setShowLoader] = useState(false);
   const [addedBusiness, setAddedBusinesses]=useState([]);
   const [notAddedBusiness, setNotAddedBusiness] = useState([]);
+  const [notCategorize, setNotCategorize] = useState([]); 
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setCategory] = useState('');
   const [selectedCategoryId, setCategoryId] = useState('')
@@ -81,7 +82,7 @@ export default (props) => {
               rating{
                 fun
                 crowd
-                girlToGuyRatio
+                ratioInput
                 difficultyGettingIn
                 difficultyGettingDrink
               }
@@ -107,9 +108,11 @@ export default (props) => {
       } });
       const alreadyAddedBusiness = getAllBusiness.data.data.allBusinesses
       setAllBusinesses(alreadyAddedBusiness);
-      
+      const notCategorize = alreadyAddedBusiness.filter((business) => {
+        return business.category.length === 0
+      } )
+      setNotCategorize(notCategorize)
       const allBusinessIdsForNot = alreadyAddedBusiness.map( business => business.placeId);
-     
       const alreadyBusinessIds= alreadyAddedBusiness
                             .filter((business) =>  getAllBusinessCategories(business.category).includes(businessType) ).map(business=>{
                               return{
@@ -246,16 +249,21 @@ export default (props) => {
 
   return (
     <div>
-      <CTabs activeTab="home">
+      <CTabs activeTab="addBusiness">
         <CNav variant="tabs">
           <CNavItem>
-            <CNavLink data-tab="home">
+            <CNavLink data-tab="addBusiness">
               ADD Business
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink data-tab="profile">
+            <CNavLink data-tab="recentlyAdded">
               Recently ADDED
+            </CNavLink>
+          </CNavItem>
+          <CNavItem>
+            <CNavLink data-tab="notCategorize">
+              Not Categorize
             </CNavLink>
           </CNavItem>
         </CNav>
@@ -285,7 +293,7 @@ export default (props) => {
           </CCol>
         </CRow>
         <CTabContent>
-          <CTabPane data-tab="home">
+          <CTabPane data-tab="addBusiness">
             { showLoader ?
             ( <Loader
               type="Oval"
@@ -302,7 +310,7 @@ export default (props) => {
             
             }
           </CTabPane>
-          <CTabPane data-tab="profile">
+          <CTabPane data-tab="recentlyAdded">
           { showLoader ?
             ( <Loader
               type="Oval"
@@ -312,6 +320,18 @@ export default (props) => {
               style = {{textAlign: 'center'}}
             /> ) : 
             <Businesslist history = {props.history} businesses = {addedBusiness} update = {true} />
+          }
+          </CTabPane>
+          <CTabPane data-tab="notCategorize">
+          { showLoader ?
+            ( <Loader
+              type="Oval"
+              color="gray"
+              height={60}
+              width={60}
+              style = {{textAlign: 'center'}}
+            /> ) : 
+            <Businesslist history = {props.history} businesses = {notCategorize} update = {true} />
           }
           </CTabPane>
         </CTabContent>
