@@ -61,8 +61,9 @@ import {
     message.error('Click on No');
   }
   const { business, category } = props;
-  console.log("the bussiness prop get", business)
-  const photoUrl = business.photoReference ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${business.photoReference}&key=AIzaSyD9CLs9poEBtI_4CHd5Y8cSHklQPoCi6NM` : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png";
+  const { googleBusiness } = business;
+  //  console.log("the bussiness prop get", business.uploadedPhotos)
+  const photoUrl = business.uploadedPhotos.length>0 && business.uploadedPhotos[0].secure_url ? business.uploadedPhotos[0].secure_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png"
    return(
      <div>
       <CCard>
@@ -127,17 +128,17 @@ import {
                   count={5}
                   onChange={ratingChanged}
                   size={20}
-                  value = {business.googleRating}
+                  value = {googleBusiness.rating}
                   activeColor="#fcbe03"
                 />
               </CCol>
             </CRow>
-            <CRow style = {{ maxHeight: 80 }}>
+            <CRow style = {{ maxHeight: 80, minHeight: 80 }}>
               <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
-                Vicinty: 
+                Address: 
               </CCol>
               <CCol sm = {8} style = {{ marginTop: 3 }} >
-                 <span>{business.address.substr(0,30) }</span>
+                 <span>{googleBusiness.formatted_address }</span>
               </CCol>
             </CRow>
             <CRow style = {{ minHeight: 80 }} >
@@ -145,11 +146,15 @@ import {
                 Types : 
               </CCol>
               <CCol sm = {8} style = {{ marginTop: 3 }} >
-                { business.types ? business.types.map((business)=>{
+                { business.category.length > 0 && !business.category.includes(null) ? business.category.map((category)=>{
+                    return (
+                      <span>{ category.title},</span>
+                    )
+                  }) : googleBusiness.types.slice(0,3).map((business)=> {
                     return (
                       <span>{ business},</span>
                     )
-                  }) : " Not Categorized Yet "
+                  })
 
                 }
                 
@@ -157,10 +162,10 @@ import {
             </CRow>
             <CRow>
               <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {5} >
-                Price Level: 
+                Phone no: 
               </CCol>
               <CCol sm = {7} style = {{ marginTop: 3 }} >
-                <span>{ renderDollars(business.priceLevel) }</span>
+                <span>{ googleBusiness.formatted_phone_number }</span>
               </CCol>
             </CRow>
             <CRow>

@@ -19,27 +19,24 @@ import './business.css'
 import Category from '../Category/Category';
 import Loader from 'react-loader-spinner'
 import SearchField from "react-search-field";
+import Pagination from '../../components/Pagination';
 
 export default (props) => {  
-  const [showLoader, setShowLoader] = useState(false);
+  const [showNotAddedLoader, setShowNotAddedLoader] = useState(false);
+  const [showAddedLoader, setShowAddedLoader] = useState(false);
+  const [showCategorizeLoader, setShowCategorizeLoader] = useState(false);
   const [addedBusiness, setAddedBusinesses]=useState([]);
   const [notAddedBusiness, setNotAddedBusiness] = useState([]);
   const [notCategorize, setNotCategorize] = useState([]); 
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setCategory] = useState('');
-  const [selectedCategoryId, setCategoryId] = useState('')
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [radius, setRadius] = useState('');
-  const [all, setAllBusinesses] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   //For Testing
  
   const onChange = e => {
     setCategory(e.target.value);
-    const specificCategory = categories.filter( category => category.title === e.target.value )[0]._id;
-    setCategoryId(specificCategory)
-    getAllBusinesses(e.target.value, latitude, longitude, radius)
+    const specificCategory = categories.filter( category => category._id === e.target.value )[0]._id;
+    requestAddedBusiness(1, specificCategory)
   };
 
   const getAllBusinessCategories = (categories, isBar) =>{
@@ -56,99 +53,62 @@ export default (props) => {
     
   }
  
-   
-
-  const getAllBusinesses = async(businessType, latitude, longitude, radius) => {
+  const getAllBusiness = async(pageNumber, added, filter) => {
+    console.log(`the page no ${pageNumber} and filter: ${filter} and added: ${added}`)
     try{ 
-      console.log("after empty search", businessType)
-      console.log("Latitude ", latitude.toFixed(4));
-      console.log("Longitude is :", longitude.toFixed(4));
-      //For testing
-       latitude =   32.7970465;
-       longitude =  -117.2545220;
-      // latitude =   31.4737;
-      // longitude =  74.3834;
-      // radius = 2000;
-      setShowLoader(true)
-      console.log(`the latittude ${latitude.toFixed(4)} and longitude ${longitude.toFixed(4)} and radius is ${radius} and place is ${businessType} `)
-      const res = await axios.get(`getGoogleMapsResults?business_type=${businessType}&lat=${latitude.toFixed(4)}&lon=${longitude.toFixed(4)}&radius=${radius}`);
-      
       const { token } = await getUserData();
       const body = {
         query:`
-        query{
-          allBusinesses{
-              name
-              rating{
-                fun
-                crowd
-                ratioInput
-                difficultyGettingIn
+          query{
+            getAllBusiness(filterInput: { pageNo: ${pageNumber}, filter: "${filter}", added: ${added} }){
+            _id
+            placeId
+            category{
+                title
+                _id
+            }    
+            name
+            rating{
+                fun,
+                crowd,
+                ratioInput,
+                difficultyGettingIn,
                 difficultyGettingDrink
-              }
-              category{
-               title
-               type
-               _id
-              }
-              ageInterval,
-              googleRating,
-              photoReference,
-              googleRating,
-              address,
-              placeId
-      
-          }
-        }
-        `
+            }
+            name
+            totalUserCountRating
+            ageInterval
+            ratioType
+            customData{
+              address
+              phoneNumber
+              rating
+            }
+            uploadedPhotos{
+                secure_url
+            }
+            googleBusiness{
+              formatted_address
+              formatted_phone_number
+              name
+              place_id
+              user_ratings_total
+              rating
+              url
+              types
+            }
+            }}
+          `
       }
       
       const getAllBusiness = await axios.post(`graphql?`,body,{ headers: {
         'Authorization': `Bearer ${token}`
       } });
-      const alreadyAddedBusiness = getAllBusiness.data.data.allBusinesses
-      setAllBusinesses(alreadyAddedBusiness);
-      const notCategorize = alreadyAddedBusiness.filter((business) => {
-        return business.category.length === 0
-      } )
-      setNotCategorize(notCategorize)
-      const allBusinessIdsForNot = alreadyAddedBusiness.map( business => business.placeId);
-      const alreadyBusinessIds= alreadyAddedBusiness
-                            .filter((business) =>  getAllBusinessCategories(business.category).includes(businessType) ).map(business=>{
-                              return{
-                                ...business,
-                                types: getAllBusinessCategories(business.category)
-                              }
-                            })
-
-                            
-      console.log("already added in system", alreadyBusinessIds)
       
-    
-      // const googleAlreadyAddedBusiness = res.data.filter((business)=>{
-      //   return(alreadyBusinessIds.includes(business.place_id));
-      // })
-      
-      const notgoogleAlreadyAddedBusiness = res.data.filter((business)=>{
-        if(allBusinessIdsForNot.includes(business.place_id))
-          return false;
-        return true
-      }).map(business => {
-        return {...business,
-          address: business.vicinity,
-          photoReference: business.photos && business.photos[0].photo_reference,
-          googleRating: business.rating,
-          types: business.types.map(type => type),
-          placeId: business.place_id
-        }
-      })
-      
-      setShowLoader(false)
-      setAddedBusinesses(alreadyBusinessIds);
-      setNotAddedBusiness(notgoogleAlreadyAddedBusiness);
+      return getAllBusiness.data.data.getAllBusiness;
 
     }catch(err){
-      console.log("the error", err)
+      console.log("the error", err.response)
     }  
   }
 
@@ -166,38 +126,22 @@ export default (props) => {
           }
         }` 
       }
-      const userBody = {
-        query:`
-          query{
-            getUser{
-                _id
-                firstName
-                lastName
-                email
-                dob
-                radius
-            }
-          }
-        ` 
-      }
+      
       try{
         const res = await axios.post(`graphql?`,body,{ headers: {
           'Authorization': `Bearer ${token}`
         } });
-        const user = await axios.post(`graphql?`,userBody,{ headers: {
-          'Authorization': `Bearer ${token}`
-        } });
-  
-        const radius = user.data.data.getUser.radius;
-        setRadius(radius)
+        console.log("the categories", res.data.data.getCategories)
+        
         setCategories(res.data.data.getCategories)
-        setCategory(res.data.data.getCategories[0].title)
-        setCategoryId(res.data.data.getCategories[0]._id)
-        navigator.geolocation.getCurrentPosition(function(position) { 
-          setLatitude(position.coords.latitude)
-          setLongitude(position.coords.longitude)
-          getAllBusinesses(res.data.data.getCategories[0].title, position.coords.latitude, position.coords.longitude, radius)
-        })
+        const allCategories = res.data.data.getCategories.filter(category => category.type === "main_category")[0]
+        console.log("the all categories", allCategories)
+        setCategory(allCategories._id)  
+        // setCategoryId(res.data.data.getCategories[0]._id)
+
+       requestNotAddedBusiness(1);
+       requestAddedBusiness(1, allCategories._id);
+       requestNotCategorize(1)
        
       }catch(err){
         console.log("the roor", err)
@@ -206,45 +150,123 @@ export default (props) => {
     fetchData();
   }, []);
 
-  const onSearch = (e) => {
-    console.log("the search", e);
-    if(e === ''){
-      getAllBusinesses(selectedCategory, latitude, longitude, radius)
-    }
-    setSearchValue(e);
+  const makeSearch = async(added, filter) =>{
+    console.log(`the search Text ${searchValue}`)
+    try{ 
+      const { token } = await getUserData();
+      const body = {
+        query:`
+        query{
+          getSearchResults(searchInput: { searchValue: "${searchValue}", filter: "${filter}", added: ${added} }){
+          _id
+          placeId
+          category{
+              title
+              _id
+          }    
+          name
+          rating{
+              fun,
+              crowd,
+              ratioInput,
+              difficultyGettingIn,
+              difficultyGettingDrink
+          }
+           name
+           totalUserCountRating
+           ageInterval
+           ratioType
+           customData{
+             address
+             phoneNumber
+             rating
+           }
+           uploadedPhotos{
+               secure_url
+           }
+           googleBusiness{
+              formatted_address
+              formatted_phone_number
+              name
+              place_id
+              user_ratings_total
+              rating
+              url
+              types
+           }
+          }}
+          `
+      }
+      
+      const getAllBusiness = await axios.post(`graphql?`,body,{ headers: {
+        'Authorization': `Bearer ${token}`
+      } });
+      
+      return getAllBusiness.data.data.getSearchResults;
+
+    }catch(err){
+      console.log("the error", err.response)
+    }  
   }
-  const getSearchResults = async() => {
-    const res = await axios.get(`/getSearchTextResult?search_text=${searchValue}`);
-    let allBusinesses = all.map(business => business.placeId)
 
-    const searchResultsnotAdded = res.data.filter((business)=>{
-      return(! allBusinesses.includes(business.place_id));
-    }).map((business)=> {
-      return {...business,
-        address: business.formatted_address,
-        photoReference: business.photos && business.photos[0].photo_reference,
-        googleRating: business.rating,
-        types: business.types.map(type => type),
-        placeId: business.place_id
+  const getSearchResults = async(tab) =>{
+  
+    if(tab === 'notAdded'){
+      setShowNotAddedLoader(true)
+      const searchResults = await makeSearch(false, 'not')
+      setNotAddedBusiness(searchResults)
+      setShowNotAddedLoader(false)
+    }
+    else if(tab === 'added'){
+      setShowAddedLoader(true)
+      const searchResults = await makeSearch(true, 'allCategorySearch')
+      setAddedBusinesses(searchResults)
+      setShowAddedLoader(false)
+    }
+    else if(tab === 'notCategorize'){
+      setShowCategorizeLoader(true)
+      const searchResults = await makeSearch(true, 'not')
+      setNotCategorize(searchResults)
+      setShowCategorizeLoader(false)
+    }
+
+
+
+  }
+
+  const requestNotAddedBusiness = async(pageNumber) => {
+    setShowNotAddedLoader(true)
+    const notAddedBusiness = await getAllBusiness(pageNumber, false, 'not');
+    setShowNotAddedLoader(false)
+    setNotAddedBusiness(notAddedBusiness)
+  }
+
+  const requestAddedBusiness = async(pageNumber, selectedCategory) => {
+    setShowAddedLoader(true)
+    const addedBusiness = await getAllBusiness(pageNumber, true, selectedCategory);
+    setShowAddedLoader(false)
+    setAddedBusinesses(addedBusiness)
+  }
+
+  const requestNotCategorize = async(pageNumber) => {
+    setShowCategorizeLoader(true)
+    const addedBusiness = await getAllBusiness(pageNumber, true, 'not');
+    setNotCategorize(addedBusiness)
+    setShowCategorizeLoader(false)
+  }
+  
+  const changeSearchValue = async(e, currentCase) => {
+    if(e === ''){
+      console.log("in iff")
+      if(currentCase === 'notAdded')
+        requestNotAddedBusiness(1);
+      else if(currentCase === 'added'){ 
+        requestAddedBusiness(1, selectedCategory);
       }
-    })
-    const searchResultsAlwaysAdded = res.data.filter((business)=>{
-      return(allBusinesses.includes(business.place_id))
-    }).map(business => {
-      return {...business,
-        address: business.formatted_address,
-        photoReference: business.photos && business.photos[0].photo_reference,
-        googleRating: business.rating,
-        types: business.types.map(type => type),
-        placeId: business.placeId
-      }
-    })
-
-    // console.log("the search Results after filter", searchResults.length)
-
-    setNotAddedBusiness(searchResultsnotAdded);
-    setAddedBusinesses(searchResultsAlwaysAdded);
-
+      else if(currentCase === 'notCategorize')
+        requestNotCategorize(1)
+    }
+    setSearchValue(e)
   }
 
   return (
@@ -267,34 +289,19 @@ export default (props) => {
             </CNavLink>
           </CNavItem>
         </CNav>
-        <CRow>
-          <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
-            <SearchField
-              placeholder="Search By Name"
-              onChange={onSearch}
-              classNames="test-class"
-              onSearchClick = { ()=> {  getSearchResults() } }
-            />
-          </CCol>
-        </CRow>
-        <CRow>
-          <CCol className = "business-type-container" sm = {12} >
-          <div className = "business-type-text" >What are you trying to ADD ?</div>  
-          <Radio.Group onChange={onChange} value={selectedCategory}>
-            { categories.map((category)=>{
-                if(category.type === "main_category"){
-                  return(
-                    <Radio value={category.title}>{ category.title }</Radio>
-                  )
-                }
-              }) 
-            }
-          </Radio.Group>
-          </CCol>
-        </CRow>
         <CTabContent>
           <CTabPane data-tab="addBusiness">
-            { showLoader ?
+          <CRow className = "search-bar" >
+            <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
+              <SearchField
+                placeholder="Search "
+                onChange={ (e)=> { changeSearchValue(e, 'notAdded')} }
+                className="search-bar-input"
+                onSearchClick = { ()=> {  getSearchResults('notAdded') } }
+              />
+            </CCol>
+          </CRow>
+            { showNotAddedLoader ?
             ( <Loader
               type="Oval"
               color="gray"
@@ -302,37 +309,97 @@ export default (props) => {
               width={60}
               style = {{textAlign: 'center'}}
             /> ) :
-            (<Businesslist  
-              businesses = {notAddedBusiness} 
-              update = {false}
-              category = {selectedCategoryId} 
-            />)
-            
+            <div>        
+              <Businesslist  
+                businesses = {notAddedBusiness} 
+                update = {false} 
+              />
+            </div>
             }
+            <div className = "pagination-style" >
+              < Pagination onChange = { (pageNumber)=>{ 
+                requestNotAddedBusiness(pageNumber)
+              } } />
+            </div>    
           </CTabPane>
           <CTabPane data-tab="recentlyAdded">
-          { showLoader ?
+          <CRow className = "search-bar" >
+            <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
+              <SearchField
+                placeholder="Search "
+                onChange={ (e)=> { changeSearchValue(e, 'added')} }
+                classNames="test-class"
+                onSearchClick = { ()=> {  getSearchResults('added') } }
+              />
+            </CCol>
+          </CRow>
+          { showAddedLoader ?
             ( <Loader
               type="Oval"
               color="gray"
               height={60}
               width={60}
               style = {{textAlign: 'center'}}
-            /> ) : 
-            <Businesslist history = {props.history} businesses = {addedBusiness} update = {true} />
-          }
+            /> ) :
+            <div>
+              <CRow className = "search-bar" >
+                <CCol className = "business-type-container" sm = {12} >
+                  <div className = "business-type-text" >What you want to ADD ?</div>  
+                  <Radio.Group onChange={onChange} value={selectedCategory}>
+                    { categories.map((category)=>{
+                        if(category.type === "main_category"){
+                          return(
+                            <Radio value={category._id}>{ category.title }</Radio>
+                          )
+                        }
+                      }) 
+                    }
+                  </Radio.Group>
+                </CCol>
+              </CRow>
+              <Businesslist  
+                businesses = {addedBusiness} 
+                update = {false}
+                category = {selectedCategory} 
+              />
+            </div>
+            }
+            <div className = "pagination-style" >
+              < Pagination onChange = { (pageNumber)=>{ 
+                requestAddedBusiness(pageNumber, selectedCategory)
+              } } />
+            </div>    
           </CTabPane>
           <CTabPane data-tab="notCategorize">
-          { showLoader ?
+          <CRow>
+            <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
+              <SearchField
+                placeholder="Search "
+                onChange={ (e)=> { changeSearchValue(e, 'notCategorize')} }
+                classNames="test-class"
+                onSearchClick = { ()=> {  getSearchResults('notCategorize') } }
+              />
+            </CCol>
+          </CRow>
+          { showCategorizeLoader ?
             ( <Loader
               type="Oval"
               color="gray"
               height={60}
               width={60}
               style = {{textAlign: 'center'}}
-            /> ) : 
-            <Businesslist history = {props.history} businesses = {notCategorize} update = {true} />
+            /> ) :
+            <div>  
+              <div> 
+                <Businesslist history = {props.history} businesses = {notCategorize} update = {true} />
+              </div>
+            </div>  
           }
+          <div className = "pagination-style" >
+            < Pagination onChange = { (pageNumber)=>{ 
+              requestNotCategorize(pageNumber)
+            } } />
+          </div>
           </CTabPane>
         </CTabContent>
       </CTabs>

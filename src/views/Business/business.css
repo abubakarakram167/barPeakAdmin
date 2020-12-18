@@ -57,9 +57,24 @@
 }
 .button-grid-business{
   position: absolute;
-  top: 38%;
+  top: 35%;
   left: 38%
 }
 .complete-business-card{
   box-shadow: inset 0px 0px 7px 2px #8a8989;
+}
+
+.pagination-style{
+  width: 50%;
+  margin: auto;
+  margin-bottom: 50px;
+  margin-top: 50px;
+}
+
+.search-bar{
+  margin-bottom: 50px;
+}
+
+.search-bar-input{
+  width: '30%'
 }
