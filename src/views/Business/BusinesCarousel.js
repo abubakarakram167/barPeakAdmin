@@ -12,13 +12,14 @@ import {
  } from '@coreui/react'
  import ReactStars from "react-rating-stars-component";
  import { useState, useEffect } from 'react';
- import { Link } from 'react-router-dom'
  import _, { map } from 'underscore';
- import { Popconfirm, message,Button } from 'antd';
+ import { Popconfirm, message } from 'antd';
  import axios from '../../api';
  import { getUserData } from '../../localStorage';
  import Modal from '../../components/Modal';
- 
+import "react-responsive-carousel/lib/styles/carousel.min.css"; 
+import Carousel from '../../components/Carousel';
+
  export default (props) => {
   const [showPopup, setShowPopup] = useState(false);
   const [success, setSuccess] = useState(true); 
@@ -62,65 +63,19 @@ import {
   }
   const { business, category } = props;
   const { googleBusiness } = business;
-    console.log("the bussiness prop get", business)
-  const photoUrl = business.uploadedPhotos.length>0 && business.uploadedPhotos[0].secure_url ? business.uploadedPhotos[0].secure_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png"
-   return(
+  const allPhotos = business.uploadedPhotos.length>0 && business.uploadedPhotos[0].secure_url ? business.uploadedPhotos: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png"
+  console.log("all photos", allPhotos)
+    return(
      <div>
       <CCard>
         <CCardBody>
           <CCardTitle style = {{ height: 20 }} >
             {business.name}
           </CCardTitle>
-          <img 
-            src={photoUrl}
-            alt="new"
-            style = {{ width: "100%", height: 200, position: 'relative' }}
-          />
-          { props.showLink && !props.update &&
-            <div className = "button-grid-business" >
-              <div>
-                <Button className = "business-card-add" onClick = { ()=> props.addCategorizeBusiness(business.placeId) } > ADD </Button> 
-                {/* <Link className = "business-card-add" to={`addBusiness/${business.placeId}/category/${category}/auto/true`} >ADD</Link> */}
-              </div>
-              <div style = {{ position: 'relative', top: 40 }} >
-                <Link className = "business-card-edit" to={`updateBusiness/${business.placeId}`} >Edit</Link>
-              </div>
-            </div>
-          } 
-
-          {  props.showLink && props.update &&
-            (<div className = "button-grid-business" >
-              <div>
-                <Link className = "business-card" to={`updateBusiness/${business.placeId}/category/${category}`}>Edit</Link>
-              </div>
-              <div style = {{ marginTop: 10 }} >
-              <Popconfirm
-                title="Are you sure to delete this task?"
-                onConfirm={() =>confirm(business.placeId)}
-                onCancel={cancel}
-                okText="Yes"
-                cancelText="No"
-              >
-                <CButton className = "delete-button" >
-                  Delete
-                </CButton>
-              </Popconfirm>
-              </div>
-            </div>)
-          }
-          {/* <CButton
-            className="m-2"
-            color = 'primary'
-            style = {{ position: 'absolute', left:130, top: 180}}
-            onClick = {(business)=>{ 
-
-            }}
-          >
-            ADD
-          </CButton> */}
-            
-          
             <CRow>
+              <Carousel style = {{ display: "block" }} photos = {allPhotos} />
+            </CRow>
+             <CRow>
               <CCol style = {{ marginTop: 7, fontSize: 16 }} sm = {4} >
                 Rating: 
               </CCol>

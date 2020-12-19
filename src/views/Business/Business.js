@@ -11,15 +11,14 @@ import {
 } from '@coreui/react'
 import Businesslist from './BusinessList';
 import { useState, useEffect } from 'react';
-import axiosApi from 'axios';
 import axios from '../../api';
 import { getUserData } from '../../localStorage';
 import { Radio } from 'antd';
 import './business.css'
-import Category from '../Category/Category';
 import Loader from 'react-loader-spinner'
 import SearchField from "react-search-field";
 import Pagination from '../../components/Pagination';
+import Modal from '../../components/Modal';
 
 export default (props) => {  
   const [showNotAddedLoader, setShowNotAddedLoader] = useState(false);
@@ -31,6 +30,9 @@ export default (props) => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setCategory] = useState('');
   const [searchValue, setSearchValue] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [success, setSuccess] = useState(true)
+  const [currentPageNumber, setCurrentPageNumber] = useState(0);
   //For Testing
  
   const onChange = e => {
@@ -235,6 +237,7 @@ export default (props) => {
   }
 
   const requestNotAddedBusiness = async(pageNumber) => {
+    console.log("innn", pageNumber)
     setShowNotAddedLoader(true)
     const notAddedBusiness = await getAllBusiness(pageNumber, false, 'not');
     setShowNotAddedLoader(false)
@@ -269,6 +272,29 @@ export default (props) => {
     setSearchValue(e)
   }
 
+  const addCategorizeBusiness = async (placeId) => {
+    const body = {
+      query:`
+        mutation{
+          addNotCategorizeBusiness(placeId: "${placeId}")
+        }
+      `
+    }
+    try{
+      const businessAdd = await axios.post(`graphql?`,body);
+      const isAdd =  businessAdd.data.data.addNotCategorizeBusiness
+      console.log("the is Adddd ed business", isAdd)
+      if(isAdd)
+        setSuccess(true)
+      else
+        setSuccess(false)
+      setShowPopup(true)
+    }catch(error){
+
+    }
+   
+  }
+
   return (
     <div>
       <CTabs activeTab="addBusiness">
@@ -291,6 +317,19 @@ export default (props) => {
         </CNav>
         <CTabContent>
           <CTabPane data-tab="addBusiness">
+          <CRow>
+            <Modal 
+              closeModal = {()=> {
+                requestNotAddedBusiness(currentPageNumber)
+                setShowPopup(false) 
+              }} 
+              notRedirect = {true} 
+              showPopup = {showPopup} 
+              success = {success} 
+              history = {props.history} 
+              message = {"Business Added SuccessFully"} 
+            />
+          </CRow>  
           <CRow className = "search-bar" >
             <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
               <SearchField
@@ -311,13 +350,15 @@ export default (props) => {
             /> ) :
             <div>        
               <Businesslist  
-                businesses = {notAddedBusiness} 
+                businesses = {notAddedBusiness}
+                addCategorizeBusiness = {(placeId)=> addCategorizeBusiness(placeId)} 
                 update = {false} 
               />
             </div>
             }
             <div className = "pagination-style" >
-              < Pagination onChange = { (pageNumber)=>{ 
+              < Pagination onChange = { (pageNumber)=>{
+                setCurrentPageNumber(pageNumber) 
                 requestNotAddedBusiness(pageNumber)
               } } />
             </div>    

@@ -38,7 +38,14 @@ const [modal, setModal] = useState(false);
           <span style = {{ textAlign: 'center', fontSize: 20, fontWeight: 500 }} >{props.message}</span> 
         </CModalBody>
         <CModalFooter>
-          <CButton color="success" onClick = {()=> {  props.delete ? history.push('/') :history.push('/business')  }} >Ok</CButton>
+          <CButton color="success" onClick = {()=> {  
+            if(props.notRedirect){
+              props.closeModal()
+            }
+            else{
+              props.delete ? history.push('/') :history.push('/business')  
+            }
+          }} >Ok</CButton>
         </CModalFooter>
       </CModal>
     </div>

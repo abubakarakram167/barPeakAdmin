@@ -18,7 +18,7 @@ export default (props) => {
           { businesses.length && businesses.map((business)=>{      
             return(
               <CCol sm="4" >
-                <Card history = {props.history} category = {props.category} showLink = {true} business = {business} update = { props.update }  />
+                <Card addCategorizeBusiness = {props.addCategorizeBusiness} history = {props.history} category = {props.category} showLink = {true} business = {business} update = { props.update }  />
               </CCol>
             );           
             })

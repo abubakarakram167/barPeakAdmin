@@ -160,7 +160,7 @@ export default (props) => {
               style = {{ width: 300, height: 200, border: '1px solid black' }}
             />
             </div>
-            <Widget  showImage = {(url)=>  { setFormData(prevState => ({ ...prevState, imageUrl: url }));   }}  />
+            <Widget  showImage = {(info)=>  { setFormData(prevState => ({ ...prevState, imageUrl: info.url }));   }}  />
             {error.imageUrl &&  <Alert message="You Must Have to Select The Image" type="error" />  }
             <p>Please select Category Image</p>
           </CCol>  

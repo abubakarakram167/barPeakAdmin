@@ -26,9 +26,9 @@ class CloudinaryWidget extends React.Component {
 
   checkUploadResult = (resultEvent) => {
     if(resultEvent.event === 'success'){
-      console.log("the url", resultEvent.info.url)
+      console.log("the url", resultEvent)
       this.setState({ url: resultEvent.info.url, showImage: false })
-      this.props.showImage(resultEvent.info.url)
+      this.props.showImage(resultEvent.info)
       // this.setState({ imageShow: true })
     }
   }

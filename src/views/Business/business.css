@@ -78,3 +78,9 @@
 .search-bar-input{
   width: '30%'
 }
+.carousel .animated li{
+  width: '50%'
+}
+.carousel{
+  display: none;
+}

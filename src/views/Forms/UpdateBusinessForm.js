@@ -18,14 +18,11 @@ import { getUserData } from '../../localStorage';
 import { Rating } from '@material-ui/lab';
 import BusinessCard from '../Business/BusinessCard';
 import _, { map } from 'underscore';
-import { ToastContainer } from 'react-toastify';
-import { MDBNotification } from "mdbreact";
-import { message, Button } from 'antd';
 import Modal from '../../components/Modal';
 import { Alert } from 'antd';
 import { Checkbox, Row, Col } from 'antd';
-import Category from '../Category/Category';
-
+import BusinessCarousel from '../Business/BusinesCarousel';
+import Widget from '../../components/Widget';
 export default (props) => {
   
   const [allCateogories, setCategories]=useState([]);
@@ -88,7 +85,7 @@ export default (props) => {
     let errors = {}
     let isValid = true;
     console.log("the title", formData.title)
-    if(formData.title === "" || formData.title === undefined){
+    if(formData.name === "" || formData.name === undefined){
       console.log("title")
       isValid = false;
       errors["title"] = "Please input title"
@@ -122,7 +119,7 @@ export default (props) => {
         mutation{
           updateBusiness(businessInput: {
               category: "${formData.category.toString()}",
-              name: "${formData.title}",
+              name: "${formData.name}",
               placeId: "${props.placeId}",
               ageInterval: "${formData.ageInterval}"
               rating:{
@@ -132,10 +129,6 @@ export default (props) => {
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
               },
-              photoReference: "${googleDetailData.photoReference}",
-              googleRating: ${googleDetailData.rating ? googleDetailData.rating : 3},
-              address: "${googleDetailData.formatted_address}",
-              priceLevel: ${googleDetailData.price_level? googleDetailData.price_level : 2 },
               ratioType: "${formData.ratioType}"
           })
           {
@@ -181,43 +174,59 @@ export default (props) => {
       }
       const singleBusinessBody = {
         query: `
-        query{
-          getSingleBusiness(placeId: "${props.placeId}"){
-                 placeId,
-                 category{
-                     title
-                     type
-                     imageUrl
-                     _id
-                 },
-                 ageInterval,
-                 rating{
-                     fun,
-                     crowd,
-                     ratioInput,
-                     difficultyGettingIn,
-                     difficultyGettingDrink
-                 },
-                 address,
-                 name,
-                 ratioType
-             }
-        }`
+          query{
+            getSingleBusiness(placeId: "${props.placeId}" ){
+            _id
+            placeId
+            category{
+                title
+                _id
+            }    
+            name
+            rating{
+                fun,
+                crowd,
+                ratioInput,
+                difficultyGettingIn,
+                difficultyGettingDrink
+            }
+            name
+            totalUserCountRating
+            ageInterval
+            ratioType
+            customData{
+              address
+              phoneNumber
+              rating
+            }
+            uploadedPhotos{
+              asset_id
+              public_id
+              url
+              secure_url
+              original_filename
+            }
+            googleBusiness{
+                formatted_address
+                formatted_phone_number
+                name
+                place_id
+                user_ratings_total
+                rating
+                url
+                types
+            }
+            }}
+          `
       }
       try{
         const res = await axios.post(`graphql?`,body,{ headers: {
           'Authorization': `Bearer ${token}`
         } });
-        const getSingleGoogleData = await axios.get(`getSinglePlaceResult?place_id=${props.placeId}`);
         const getSingleBusinessData = await axios.post(`graphql?`,singleBusinessBody,{ headers: {
           'Authorization': `Bearer ${token}`
         }});
-        let singleData = {...getSingleGoogleData.data, 
-          address: getSingleGoogleData.data.vicinity,
-          photoReference: getSingleGoogleData.data.photos && getSingleGoogleData.data.photos[0].photo_reference,
-          googleRating: getSingleGoogleData.data.rating,
-          types: getSingleGoogleData.data.types.map(type => type)
-        }
+        
         const singleBusiness = getSingleBusinessData.data.data.getSingleBusiness;
         console.log("the single business", singleBusiness)
         const allSpecificCategories = res.data.data.getCategories
@@ -232,8 +241,8 @@ export default (props) => {
         setRatingData(singleBusiness.rating);
         singleBusiness.category = singleBusiness.category.map(category => category._id) 
         setFormData(singleBusiness)
-        setFormData(prevState => ({ ...prevState, title: singleBusiness.name }));
-        setGoogleDetailData(singleData)
+        // setFormData(prevState => ({ ...prevState, title: singleBusiness.name }));
+        setGoogleDetailData(singleBusiness.googleBusiness)
         setCategories(allSpecificCategories);
       }catch(err){
         console.log("the error", err.response);
@@ -243,17 +252,13 @@ export default (props) => {
   }, []);
 
   const isSelected = (categoryId) => {
-    // console.log("the category", categoryId)
-    // console.log("the formdata", formData)
     let formDataCategoryIds = formData.category
-    // console.log("forma data", formDataCategoryIds)
     return formDataCategoryIds.includes(categoryId);
   }
 
-    //  console.log("the google detail data", googleDetailData)
-  //  console.log("form Data", formData)
-  //  console.log("the rating Data", ratingData);
-
+  const photos = formData.uploadedPhotos && formData.uploadedPhotos.length>0 && formData.uploadedPhotos[0].secure_url ? formData.uploadedPhotos: null 
+  console.log("the untern", photos)
+  
   return(
     <div>
       <CContainer style = {{ width: "50%" }}  >
@@ -262,8 +267,29 @@ export default (props) => {
         </CRow>
         <CRow>
           <CCol sm = "12" >
-            { !_.isEmpty(googleDetailData) &&
-              <BusinessCard showLink = {false}  business = {googleDetailData} /> 
+            
+            { photos ?
+                <BusinessCarousel showLink = {false}  business = { formData } /> 
+              : (<CRow>
+                  <CCol sm = {12} >
+                    <p >Category Image</p>
+                    <br />
+                    <div style = {{ width: 300, height: 200, border: '1px solid black' }} >
+                    <img
+                      src = { formData.uploadedPhotos &&  formData.uploadedPhotos[0].secure_url }
+                      style = {{ width: 300, height: 200, border: '1px solid black' }}
+                    />
+                    </div>
+                    <Widget  
+                      showImage = {(url)=>  { 
+                        console.log("the url incomng", url)
+                        setFormData(prevState => ({ ...prevState, uploadedPhotos: [url] }));   
+                      }}  
+                    />
+                    {error.imageUrl &&  <Alert message="You Must Have to Select The Image" type="error" />  }
+                    <p>Please select Category Image</p>
+                  </CCol>  
+                </CRow>)
             } 
           </CCol>
         </CRow>
@@ -275,64 +301,16 @@ export default (props) => {
                 <CInput
                   type="text"
                   id="title"
-                  name="title"
+                  name="name"
                   placeholder="Enter title.."
-                  defaultValue = {googleDetailData["name"]}
-                  value = { formData.title }
+                  value = { formData.name }
                   onChange = { onChange }
                 />
                 {error.title &&  <Alert message="Please title is required" type="error" />  }
                 <CFormText className="help-block">Please enter your Title</CFormText>
               </CFormGroup>
-              {/* <CFormGroup>
-                <CLabel htmlFor="nf-password">Short Description</CLabel>
-                <CTextarea
-                  name="shortDescription"
-                  placeholder="Enter Short Description."
-                  onChange = { onChange }
-                  value = { formData.shortDescription }
-                  rows = "2"
-                />
-                 {error.shortDescription &&  <Alert message="SHort Description is required" type="error" />  }
-                <CFormText className="help-block">Please enter Short Description</CFormText>
-              </CFormGroup>
-              <CFormGroup>
-                <CLabel htmlFor="nf-password">Long Description</CLabel>
-                <CTextarea
-                  name="longDescription"
-                  placeholder="Enter Long Description."
-                  onChange = { onChange }
-                  value = {formData.longDescription}
-                  size = "large"
-                  rows = "5"
-                  cols = "40"
-                />
-                 {error.longDescription &&  <Alert message="Long Description is required" type="error" />  }
-                <CFormText className="help-block">Please enter Long Description</CFormText>
-              </CFormGroup>
               <CFormGroup>
                 <CLabel >Category</CLabel>
-                <select 
-                  onChange = {onChange}
-                  name = "category"
-                  value = {!_.isEmpty(formData) &&formData.category._id} 
-                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
-                >
-                  { allCateogories.map((category)=>{
-                      if(category.type === "main_category"){
-                        return(
-                          <option value = {category._id}>{ category.title }</option>
-                        );
-                      }  
-                    })
-                  }
-                </select>
-                {error.category &&  <Alert message="category is required" type="error" />  }
-                <CFormText className="help-block">Please Select Category</CFormText>
-              </CFormGroup> */}
-              <CFormGroup>
-                <CLabel >Category</CLabel>
-               
                   <Row>
                     { allCateogories.map((category)=>{
                           if(category.type === "main_category"){
@@ -340,7 +318,6 @@ export default (props) => {
                               <Col span={8}>
                                 <label>
                                 <input type="checkbox" name = "category" value = { category._id } defaultChecked={isSelected(category._id)} onChange={onChangeCategory} />
-                                {/* <Checkbox name= "category" Checked = { afterTime } value={category._id}>{category.title}</Checkbox> */}
                                  {category.title}
                                 </label>
                               </Col>
@@ -348,8 +325,7 @@ export default (props) => {
                           }  
                         })
                       }
-                  </Row>
-                
+                  </Row>       
                 {error.category &&  <Alert message="Select Atleast one category" type="error" />  }
                 <CFormText className="help-block">Please Select Category</CFormText>
               </CFormGroup>
