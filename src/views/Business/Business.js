@@ -32,7 +32,7 @@ export default (props) => {
   const [searchValue, setSearchValue] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [success, setSuccess] = useState(true)
-  const [currentPageNumber, setCurrentPageNumber] = useState(0);
+  const [currentPageNumber, setCurrentPageNumber] = useState(1);
   //For Testing
  
   const onChange = e => {
