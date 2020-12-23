@@ -6,7 +6,7 @@ if(environment === "development"){
   url = 'http://localhost:3000/'
 }
 else
-  url = 'https://barpeak-backend.herokuapp.com/'
+  url = 'https://counterflowbarpeak-backend-app.herokuapp.com/'
 
 console.log("the url", url);  
 
