@@ -33,12 +33,13 @@ import {
     }
     return dollars;
   }
-  const confirm = async (placeId) =>{
+  const confirm = async (id) =>{
+    console.log("the business id to be delete", id)
     const { token } = await getUserData();
     const body = {
       query:` 
       mutation{
-        deleteBusiness(placeId: "${placeId}")
+        deleteBusiness(id: "${id}")
       }
       `
     }
@@ -50,7 +51,7 @@ import {
         setShowPopup(true)
       }
     }catch(error){
-
+      console.log("the error", error.response)
     }
   }
   
@@ -98,13 +99,13 @@ import {
 
           {  props.showLink && props.update &&
             (<div className = "button-grid-business" >
-              <div>
-                <Link className = "business-card" to={`updateBusiness/${business.placeId}/category/${category}`}>Edit</Link>
+              <div style = {{ position: 'relative', top: 45, right: 25 }} >
+                <Link className = "business-card-edit" to={`updateBusiness/${business._id}`} >Edit</Link>
               </div>
               <div style = {{ marginTop: 10 }} >
               <Popconfirm
                 title="Are you sure to delete this task?"
-                onConfirm={() =>confirm(business.placeId)}
+                onConfirm={() =>confirm(business._id)}
                 onCancel={cancel}
                 okText="Yes"
                 cancelText="No"

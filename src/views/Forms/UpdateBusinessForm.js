@@ -61,7 +61,7 @@ export default (props) => {
     const specificCategory = allCateogories.filter(category => selectedcategoryIds.includes(category._id)).map(category => category._id) 
     const barCategoryTitle = allCateogories.filter(category => selectedcategoryIds.includes(category._id) ).map(category => category.title)
     
-    if( barCategoryTitle.includes("bar") )
+    if( barCategoryTitle.includes("Bar") )
       setBar(true)
     else
       setBar(false) 
@@ -259,7 +259,7 @@ export default (props) => {
         const allSpecificCategories = res.data.data.getCategories
         singleBusiness.category.map((category)=>{
           selectedcategoryIds.push(category._id)
-          if(category.title === 'bar')
+          if(category.title === 'Bar')
             setBar(true)  
         })
        
@@ -416,7 +416,13 @@ export default (props) => {
                             return(
                               <Col span={8}>
                                 <label>
-                                <input type="checkbox" name = "category" value = { category._id } defaultChecked={isSelected(category._id)} onChange={onChangeCategory} />
+                                <input 
+                                  type="checkbox" 
+                                  name = "category" 
+                                  value = { category._id } 
+                                  defaultChecked={isSelected(category._id)} 
+                                  onChange={onChangeCategory} 
+                                />
                                  {category.title}
                                 </label>
                               </Col>
@@ -431,7 +437,28 @@ export default (props) => {
               { isBar &&
                 (<CFormGroup>
                   <CLabel >Bar Category</CLabel>
-                  <select 
+                  <Row>
+                    { allCateogories.map((category)=>{
+                          if(category.type === "sub_bar"){
+                            return(
+                              <Col span={8}>
+                                <label>
+                                  <input 
+                                    type="checkbox" 
+                                    name = "barCategory" 
+                                    value = { category._id } 
+                                    defaultChecked={isSelected(category._id)} 
+                                    onChange={onChangeCategory} 
+                                  />
+                                  {category.title}
+                                </label>
+                              </Col>
+                            );
+                          }  
+                        })
+                      }
+                  </Row> 
+                  {/* <select 
                     onChange = { onChange } 
                     name = "barCategory"
                     value = { !_.isEmpty(formData) && formData.barCategory &&formData.barCategory._id }
@@ -445,7 +472,7 @@ export default (props) => {
                         }  
                       })
                     }
-                  </select>
+                  </select> */}
                   {error.barcategory &&  <Alert message="category is required" type="error" />  }
                   <CFormText className="help-block">Please Select Bar Category</CFormText>
                 </CFormGroup>)

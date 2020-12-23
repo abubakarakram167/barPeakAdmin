@@ -418,7 +418,7 @@ export default (props) => {
               </CRow>
               <Businesslist  
                 businesses = {addedBusiness} 
-                update = {false}
+                update = {true}
                 category = {selectedCategory} 
               />
             </div>
