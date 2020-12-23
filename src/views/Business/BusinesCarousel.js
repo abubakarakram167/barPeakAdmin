@@ -50,8 +50,6 @@ import Carousel from '../../components/Carousel';
       if(res){
         setShowPopup(true)
       }
-       
-      console.log("the response after deleting", res);
     }catch(error){
 
     }
@@ -61,10 +59,23 @@ import Carousel from '../../components/Carousel';
     console.log(e);
     message.error('Click on No');
   }
+  
   const { business, category } = props;
-  const { googleBusiness } = business;
+
+  let updatedData = { };
+  if(business.googleBusiness){
+    updatedData.address = business.googleBusiness.formatted_address;
+    updatedData.rating = business.googleBusiness.rating;
+    updatedData.phoneNo = business.googleBusiness.formatted_phone_number
+  }
+  else{
+    updatedData.address = business.customData.address;
+    updatedData.rating = business.customData.rating;
+    updatedData.phoneNo = business.customData.phoneNo;
+  }
+
   const allPhotos = business.uploadedPhotos.length>0 && business.uploadedPhotos[0].secure_url ? business.uploadedPhotos: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png"
-  console.log("all photos", allPhotos)
+  
     return(
      <div>
       <CCard>
@@ -76,37 +87,37 @@ import Carousel from '../../components/Carousel';
               <Carousel style = {{ display: "block" }} photos = {allPhotos} />
             </CRow>
              <CRow>
-              <CCol style = {{ marginTop: 7, fontSize: 16 }} sm = {4} >
+              <CCol style = {{ marginTop: 7, fontSize: 16 }} xs = {4} >
                 Rating: 
               </CCol>
-              <CCol sm = {8} style = {{ marginTop: 3 }} >
+              <CCol xs = {6} style = {{ marginTop: 3 }} >
                 <ReactStars
                   count={5}
                   onChange={ratingChanged}
                   size={20}
-                  value = {googleBusiness.rating}
+                  value = {updatedData.rating}
                   activeColor="#fcbe03"
                 />
               </CCol>
             </CRow>
             <CRow style = {{ maxHeight: 80, minHeight: 80 }}>
-              <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
+              <CCol style = {{ marginTop: 0, fontSize: 16 }} xs = {4} >
                 Address: 
               </CCol>
-              <CCol sm = {8} style = {{ marginTop: 3 }} >
-                 <span>{googleBusiness.formatted_address }</span>
+              <CCol xs = {6} style = {{ marginTop: 3 }} >
+                 <span>{updatedData.address }</span>
               </CCol>
             </CRow>
             <CRow style = {{ minHeight: 80 }} >
-              <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {4} >
+              <CCol style = {{ marginTop: 0, fontSize: 16 }} xs = {4} >
                 Types : 
               </CCol>
-              <CCol sm = {8} style = {{ marginTop: 3 }} >
-                { business.category.length > 0 && !business.category.includes(null) ? business.category.map((category)=>{
+              <CCol xs = {6} style = {{ marginTop: 3 }} >
+                { category.length > 0 && !category.includes(null) ? category.map((category)=>{
                     return (
                       <span>{ category.title},</span>
                     )
-                  }) : googleBusiness.types.slice(0,3).map((business)=> {
+                  }) : business.googleBusiness.types.slice(0,3).map((business)=> {
                     return (
                       <span>{ business},</span>
                     )
@@ -117,11 +128,11 @@ import Carousel from '../../components/Carousel';
               </CCol>
             </CRow>
             <CRow>
-              <CCol style = {{ marginTop: 0, fontSize: 16 }} sm = {5} >
+              <CCol style = {{ marginTop: 0, fontSize: 16 }} xs = {4} >
                 Phone no: 
               </CCol>
-              <CCol sm = {7} style = {{ marginTop: 3 }} >
-                <span>{ googleBusiness.formatted_phone_number }</span>
+              <CCol xs = {7} style = {{ marginTop: 3 }} >
+                <span>{ updatedData.phoneNo }</span>
               </CCol>
             </CRow>
             <CRow>

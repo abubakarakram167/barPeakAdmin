@@ -11,39 +11,34 @@ import {
   CButton
  } from '@coreui/react'
 import axios from '../../api';
-import AxiosApi from 'axios';
 import { useState, useEffect } from 'react';
-import SimpleReactValidator from 'simple-react-validator';
 import { getUserData } from '../../localStorage';
 import { Rating } from '@material-ui/lab';
-import BusinessCard from '../Business/BusinessCard';
 import _, { map } from 'underscore';
 import Modal from '../../components/Modal';
 import { Alert } from 'antd';
-import { Checkbox, Row, Col } from 'antd';
+import { Row, Col } from 'antd';
 import BusinessCarousel from '../Business/BusinesCarousel';
 import Widget from '../../components/Widget';
+import './formContainer.css';
 export default (props) => {
   
   const [allCateogories, setCategories]=useState([]);
   const [isBar, setBar]=useState(false);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ uploadedPhotos: [], newPhotos: [] });
   const [ratingData, setRatingData] = useState({});
   const [googleDetailData, setGoogleDetailData] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [success, setSuccess] = useState(true); 
   const [error, setError] = useState({})
-  const [afterTime, setAfterTime] = useState(false);
-  
+  const [customField, setCustomField] = useState(false);
+  const [specificBusinessCategory, setSpecificBusinessCategory] = useState([])
   const selectedcategoryIds = []
-
-  setTimeout(()=> setAfterTime(true), 5000)
 
   const onChange = (event) => {
     const { name, value } = event.target;
     if(name === "category"){
       const specificCategory = allCateogories.filter(category => category._id === value)[0]
-      console.log("the specific category", specificCategory);
       if(specificCategory.title === "bar")
         setBar(true)
       else
@@ -66,7 +61,6 @@ export default (props) => {
     const specificCategory = allCateogories.filter(category => selectedcategoryIds.includes(category._id)).map(category => category._id) 
     const barCategoryTitle = allCateogories.filter(category => selectedcategoryIds.includes(category._id) ).map(category => category.title)
     
-    console.log("the bar category title")
     if( barCategoryTitle.includes("bar") )
       setBar(true)
     else
@@ -84,24 +78,16 @@ export default (props) => {
   const validate = () => {
     let errors = {}
     let isValid = true;
-    console.log("the title", formData.title)
+   
     if(formData.name === "" || formData.name === undefined){
-      console.log("title")
       isValid = false;
       errors["title"] = "Please input title"
     }
     if(formData.category === "" || formData.category === undefined){
-      console.log("category")
       isValid = false;
       errors["category"] = "Please input category"
     }
-    // if( isBar && formData.barCategory === "" || formData.barCategory === undefined){
-    //   console.log("barcate")
-    //   isValid = false;
-    //   errors["barCategory"] = "Please input bar Category"
-    // }
     
-    console.log("isValid", isValid)
     if(isValid){
       return true
     }
@@ -109,18 +95,50 @@ export default (props) => {
     return false
   }
 
+  const getPhotos = () => {
+    let totalPhotos = ''
+    if(formData.uploadedPhotos.length>0){
+      formData.uploadedPhotos.map((photo)=>{
+        totalPhotos = totalPhotos + photo.secure_url  + ','
+      })
+    }
+    else if(formData.newPhotos.length> 0){
+      formData.newPhotos.map((photo)=>{
+        totalPhotos = totalPhotos + photo.secure_url  + ','
+      })
+    }
+   
+    return totalPhotos 
+  }
+
   const submitForm = async () => {
     const { token } = await getUserData();
+    let customData = {};
+    if(formData.customBusiness){
+      customData.rating = formData.customRating
+      customData.address = formData.address
+      customData.latitude = formData.latitude
+      customData.longitude = formData.longitude
+      customData.phoneNo = formData.phoneNo
+    }
+    else{
+      customData.rating = null
+      customData.address = null
+      customData.latitude = null
+      customData.longitude = null
+      customData.phoneNo = null
+    }
+    
+    const allPhotos = getPhotos().slice(0,-1);
     
     if(validate()){
-      console.log("inn")
       const body = {
         query:` 
         mutation{
           updateBusiness(businessInput: {
               category: "${formData.category.toString()}",
               name: "${formData.name}",
-              placeId: "${props.placeId}",
+              id: "${props.id}",
               ageInterval: "${formData.ageInterval}"
               rating:{
                 fun: ${ratingData.fun}
@@ -129,7 +147,15 @@ export default (props) => {
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
               },
-              ratioType: "${formData.ratioType}"
+              ratioType: "${formData.ratioType}",
+              customData:{
+                rating: ${customData.rating},
+                address: "${customData.address}"
+                latitude: ${customData.latitude},
+                longitude: ${customData.longitude},
+                phoneNo: "${customData.phoneNo}"
+              },
+              photos: "${allPhotos}" 
           })
           {
             name
@@ -144,14 +170,9 @@ export default (props) => {
         if(res.data.data.updateBusiness){
           setShowPopup(true)
         } 
-        console.log("the response after getting business", res); 
       }catch(err){
-        // if(err.response.data){
-        //   console.log("the error", err.data.errors.length)
-        // }
         setShowPopup(true)
         setSuccess(false);
-        console.log("the error below", err.response)
         
       }
     }
@@ -175,7 +196,7 @@ export default (props) => {
       const singleBusinessBody = {
         query: `
           query{
-            getSingleBusiness(placeId: "${props.placeId}" ){
+            getSingleBusiness(id: "${props.id}" ){
             _id
             placeId
             category{
@@ -196,27 +217,26 @@ export default (props) => {
             ratioType
             customData{
               address
-              phoneNumber
+              phoneNo
               rating
+              latitude
+              longitude
             }
+            customBusiness,
             uploadedPhotos{
-              asset_id
-              public_id
-              url
               secure_url
-              original_filename
             }
             googleBusiness{
-                formatted_address
-                formatted_phone_number
-                name
-                place_id
-                user_ratings_total
-                rating
-                url
-                types
+              formatted_address
+              formatted_phone_number
+              name
+              place_id
+              user_ratings_total
+              rating
+              url
+              types
             }
-            }}
+          }}
           `
       }
       try{
@@ -226,26 +246,32 @@ export default (props) => {
         const getSingleBusinessData = await axios.post(`graphql?`,singleBusinessBody,{ headers: {
           'Authorization': `Bearer ${token}`
         }});
-        
         const singleBusiness = getSingleBusinessData.data.data.getSingleBusiness;
-        console.log("the single business", singleBusiness)
+        if(singleBusiness.customBusiness){
+          setCustomField(true)
+          const { customData } = singleBusiness;
+          singleBusiness.customRating = customData.rating;
+          singleBusiness.latitude = customData.latitude
+          singleBusiness.longitude = customData.longitude
+          singleBusiness.address =  customData.address
+          singleBusiness.phoneNo = customData.phoneNo
+        }
         const allSpecificCategories = res.data.data.getCategories
-
         singleBusiness.category.map((category)=>{
           selectedcategoryIds.push(category._id)
           if(category.title === 'bar')
             setBar(true)  
         })
-
-        // console.log("the single business detail data", singleBusiness)
+       
         setRatingData(singleBusiness.rating);
-        singleBusiness.category = singleBusiness.category.map(category => category._id) 
+        setSpecificBusinessCategory(singleBusiness.category)
+        singleBusiness.category = singleBusiness.category.map(category => category._id)
+        singleBusiness.newPhotos = []
         setFormData(singleBusiness)
-        // setFormData(prevState => ({ ...prevState, title: singleBusiness.name }));
         setGoogleDetailData(singleBusiness.googleBusiness)
         setCategories(allSpecificCategories);
       }catch(err){
-        console.log("the error", err.response);
+        console.log("the error", err);
       }
     }
     fetchData();
@@ -256,12 +282,13 @@ export default (props) => {
     return formDataCategoryIds.includes(categoryId);
   }
 
-  const photos = formData.uploadedPhotos && formData.uploadedPhotos.length>0 && formData.uploadedPhotos[0].secure_url ? formData.uploadedPhotos: null 
-  console.log("the untern", photos)
+  let photos = formData.uploadedPhotos && formData.uploadedPhotos.length>0 && formData.uploadedPhotos[0].secure_url ? formData.uploadedPhotos: null
+  if(formData.newPhotos && formData.newPhotos.length>0)
+    photos = null
   
   return(
     <div>
-      <CContainer style = {{ width: "50%" }}  >
+      <CContainer className = "form-container-width" >
         <CRow>
           <Modal showPopup = {showPopup} success = {success} history = {props.history} message = {"Business Updated SuccessFully"} />
         </CRow>
@@ -269,21 +296,20 @@ export default (props) => {
           <CCol sm = "12" >
             
             { photos ?
-                <BusinessCarousel showLink = {false}  business = { formData } /> 
+                <BusinessCarousel showLink = {false}  business = { formData } category = {specificBusinessCategory} /> 
               : (<CRow>
                   <CCol sm = {12} >
                     <p >Category Image</p>
                     <br />
                     <div style = {{ width: 300, height: 200, border: '1px solid black' }} >
                     <img
-                      src = { formData.uploadedPhotos &&  formData.uploadedPhotos[0].secure_url }
+                      src = { formData.newPhotos && formData.newPhotos.length>0 &&  formData.newPhotos[0].secure_url }
                       style = {{ width: 300, height: 200, border: '1px solid black' }}
                     />
                     </div>
                     <Widget  
                       showImage = {(url)=>  { 
-                        console.log("the url incomng", url)
-                        setFormData(prevState => ({ ...prevState, uploadedPhotos: [url] }));   
+                        setFormData(prevState => ({ ...prevState, newPhotos: formData.newPhotos.concat(url) }));   
                       }}  
                     />
                     {error.imageUrl &&  <Alert message="You Must Have to Select The Image" type="error" />  }
@@ -309,6 +335,79 @@ export default (props) => {
                 {error.title &&  <Alert message="Please title is required" type="error" />  }
                 <CFormText className="help-block">Please enter your Title</CFormText>
               </CFormGroup>
+              { customField &&
+              <div>
+              <CFormGroup>
+                <CLabel >Address</CLabel>
+                <CInput
+                  type="text"
+                  id="address"
+                  name="address"
+                  placeholder="Enter address.."
+                  value = { formData.address }
+                  onChange = { onChange }
+                />
+                {error.address &&  <Alert message="Address is required" type="error" />  }
+                <CFormText className="help-block">Please enter your Address</CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel >Latittude</CLabel>
+                <CInput
+                  type="number"
+                  id="latitude"
+                  name="latitude"
+                  placeholder="Enter latitude.."
+                  value = { formData.latitude }
+                  onChange = { onChange }
+                />
+                {error.latitude &&  <Alert message="Latitude is required" type="error" />  }
+                <CFormText className="help-block">Please enter Correct Latittude</CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel >Longitude</CLabel>
+                <CInput
+                  type="number"
+                  id="longitude"
+                  name="longitude"
+                  placeholder="Enter longitude.."
+                  value = { formData.longitude }
+                  onChange = { onChange }
+                />
+                {error.latitude &&  <Alert message="Longitude is required" type="error" />  }
+                <CFormText className="help-block">Please enter Correct Longitude </CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel >Rating</CLabel>
+                <CInput
+                  type="number"
+                  id="rating"
+                  name="rating"
+                  placeholder="Enter Google Rating.."
+                  value = { formData.customRating }
+                  onChange = { onChange }
+                  max= {5}
+                  min = {1}
+                />
+                {error.rating &&  <Alert message="Rating is required" type="error" />  }
+                <CFormText className="help-block">Please enter Google Rating </CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel >PHone No</CLabel>
+                <input 
+                  type="tel" 
+                  name="phoneNo" 
+                  id="phone" 
+                  pattern="(?:\(\d{3}\)|\d{3})[- ]?\d{3}[- ]?\d{4}" 
+                  maxlength="14" title="US based Phone Number in the format of: (123) 456-7890" 
+                  placeholder="(xxx) xxx-xxxx" 
+                  required
+                  onChange = { onChange } 
+                  value = {formData.phoneNo}
+                  />  
+                <CFormText className="help-block">Please Select Phone No</CFormText>
+              </CFormGroup>
+              </div>
+              }  
               <CFormGroup>
                 <CLabel >Category</CLabel>
                   <Row>
@@ -385,7 +484,7 @@ export default (props) => {
                   onChange = {onChange } 
                   name = "ratioType"
                   value = { formData.ratioType }
-                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                  className = "ratio-select" 
                 >
                   <option selected value="girl">girlToGuyRatio</option>
                   <option value="boy">boyToGirlRatio</option>
@@ -413,7 +512,9 @@ export default (props) => {
           </CCol>
         </CRow>
         <CRow>
-          <CCol>
+          <CCol
+            style = {{ textAlign: 'center' }}
+          >
           <CButton
             style = {{ marginTop: 100, marginBottom: 50 }}
             color = "info"

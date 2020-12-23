@@ -1,4 +1,5 @@
 import React from 'react';
+import './widget.css';
 
 class CloudinaryWidget extends React.Component {
   constructor(props) {
@@ -37,7 +38,7 @@ class CloudinaryWidget extends React.Component {
     return (
       <div>
         <div id = "photo-form-container" style = {{ textAlign:'center', marginTop: 30 }}>
-          <button style = {{ position: 'absolute', top: '45%', left: '24%', borderRadius: '10%' }} className = "widget-button"  onClick = { () => this.showWidget() }  > { !this.state.url ?' Upload' : 'Change'  } </button>
+          <button  className = "widget-button"  onClick = { () => this.showWidget() }  > { !this.state.url ?' Upload' : 'Change'  } </button>
         </div>
       </div> 
     );

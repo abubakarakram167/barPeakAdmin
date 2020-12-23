@@ -13,10 +13,9 @@ useEffect(() => {
 
 }, []);
 
-  const {place_id, category_id, auto_submit} = props.match.params
   return(
   <div>
-    <BusinessAddForm  placeId = { place_id } autoSubmit = {auto_submit} categoryId = { category_id } history = {props.history}  />  
+    <BusinessAddForm history = {props.history}  />  
   </div>
   )
 }

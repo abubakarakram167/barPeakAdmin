@@ -1,6 +1,6 @@
 import { Carousel } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
-
+import './carousel.css';
 export default (props) => {
   const [index, setIndex] = useState(0);
 
@@ -12,11 +12,10 @@ export default (props) => {
     <Carousel style = { { display: "block", minHeight: 80, maxHeight: 350 } } activeIndex={index} onSelect={handleSelect}>
       { 
        props.photos.map((photo)=>{
-         console.log("in carousel", photo)
         return (
           <Carousel.Item>
           <img
-            className="d-block w-100"
+            className="d-block w-100 carousel-image"
             src={photo.secure_url}
             alt="First slide"
           />

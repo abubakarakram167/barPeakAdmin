@@ -1,0 +1,16 @@
+.form-container-width{
+  width: 50%
+}
+@media screen and (max-width: 800px) {
+  .form-container-width{
+    width: 90%
+  }
+}
+
+.ratio-select{
+  margin-left: 20px; 
+  width: '70%'; 
+  padding: 5px; 
+  border: 1px solid black; 
+  border-radius: 10px; 
+}

@@ -1,0 +1,12 @@
+.widget-button{
+   position: absolute; 
+   top: 45%; 
+   left: 24%; 
+   border-radius: 10%; 
+}
+
+@media screen and (max-width: 420px) {
+  .widget-button{
+    left: 40%; 
+  }
+}

@@ -49,8 +49,6 @@ import {
       if(res){
         setShowPopup(true)
       }
-       
-      console.log("the response after deleting", res);
     }catch(error){
 
     }
@@ -61,8 +59,18 @@ import {
     message.error('Click on No');
   }
   const { business, category } = props;
-  const { googleBusiness } = business;
-    console.log("the bussiness prop get", business)
+
+  let updatedData = { };
+  if(business.googleBusiness){
+    updatedData.address = business.googleBusiness.formatted_address;
+    updatedData.rating = business.googleBusiness.rating;
+    updatedData.phoneNo = business.googleBusiness.formatted_phone_number
+  }
+  else{
+    updatedData.address = business.customData.address;
+    updatedData.rating = business.customData.rating;
+    updatedData.phoneNo = business.customData.phoneNo;
+  }
   const photoUrl = business.uploadedPhotos.length>0 && business.uploadedPhotos[0].secure_url ? business.uploadedPhotos[0].secure_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png"
    return(
      <div>
@@ -83,7 +91,7 @@ import {
                 {/* <Link className = "business-card-add" to={`addBusiness/${business.placeId}/category/${category}/auto/true`} >ADD</Link> */}
               </div>
               <div style = {{ position: 'relative', top: 40 }} >
-                <Link className = "business-card-edit" to={`updateBusiness/${business.placeId}`} >Edit</Link>
+                <Link className = "business-card-edit" to={`updateBusiness/${business._id}`} >Edit</Link>
               </div>
             </div>
           } 
@@ -129,7 +137,7 @@ import {
                   count={5}
                   onChange={ratingChanged}
                   size={20}
-                  value = {googleBusiness.rating}
+                  value = {updatedData.rating}
                   activeColor="#fcbe03"
                 />
               </CCol>
@@ -139,7 +147,7 @@ import {
                 Address: 
               </CCol>
               <CCol sm = {8} style = {{ marginTop: 3 }} >
-                 <span>{googleBusiness.formatted_address }</span>
+                 <span>{ updatedData.address }</span>
               </CCol>
             </CRow>
             <CRow style = {{ minHeight: 80 }} >
@@ -151,7 +159,7 @@ import {
                     return (
                       <span>{ category.title},</span>
                     )
-                  }) : googleBusiness.types.slice(0,3).map((business)=> {
+                  }) : business.googleBusiness.types.slice(0,3).map((business)=> {
                     return (
                       <span>{ business},</span>
                     )
@@ -166,7 +174,7 @@ import {
                 Phone no: 
               </CCol>
               <CCol sm = {7} style = {{ marginTop: 3 }} >
-                <span>{ googleBusiness.formatted_phone_number }</span>
+                <span>{ updatedData.phoneNo }</span>
               </CCol>
             </CRow>
             <CRow>

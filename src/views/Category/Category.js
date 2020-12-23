@@ -61,10 +61,10 @@ export default () => {
           } 
         </CRow>
         <CRow>
-          <CCol  sm = {4}>
+          <CCol xs  = {4} sm = {4}>
             <span style = {{ fontSize: 30 }} >Bar Categories</span> 
           </CCol>
-          <CCol sm = {8} style = {{ textAlign: 'end' }} >
+          <CCol xs = {8} sm = {8} style = {{ textAlign: 'end' }} >
             <Link style = {{ position: 'relative', top: 20, color: 'white', padding: 20, paddingTop: 10, paddingBottom: 10,marginTop: 15, backgroundColor: '#77c2e6', fontSize: 14, fontWeight: 600 }} to={`categoryAdd/${null}`}>ADD</Link>
             {/* <CButton style = {{  backgroundColor: '#77c2e6', fontSize: 14, fontWeight: 600 }} > Add </CButton> */}
           </CCol>

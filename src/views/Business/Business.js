@@ -7,7 +7,6 @@ import {
   CTabContent,
   CRow,
   CCol
-
 } from '@coreui/react'
 import Businesslist from './BusinessList';
 import { useState, useEffect } from 'react';
@@ -19,7 +18,9 @@ import Loader from 'react-loader-spinner'
 import SearchField from "react-search-field";
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
-
+import { Button } from '@material-ui/core';
+import { Link } from 'react-router-dom'
+import {Row, Col} from 'antd';
 export default (props) => {  
   const [showNotAddedLoader, setShowNotAddedLoader] = useState(false);
   const [showAddedLoader, setShowAddedLoader] = useState(false);
@@ -56,7 +57,7 @@ export default (props) => {
   }
  
   const getAllBusiness = async(pageNumber, added, filter) => {
-    console.log(`the page no ${pageNumber} and filter: ${filter} and added: ${added}`)
+    
     try{ 
       const { token } = await getUserData();
       const body = {
@@ -83,7 +84,7 @@ export default (props) => {
             ratioType
             customData{
               address
-              phoneNumber
+              phoneNo
               rating
             }
             uploadedPhotos{
@@ -133,27 +134,26 @@ export default (props) => {
         const res = await axios.post(`graphql?`,body,{ headers: {
           'Authorization': `Bearer ${token}`
         } });
-        console.log("the categories", res.data.data.getCategories)
+        
         
         setCategories(res.data.data.getCategories)
         const allCategories = res.data.data.getCategories.filter(category => category.type === "main_category")[0]
-        console.log("the all categories", allCategories)
+       
         setCategory(allCategories._id)  
-        // setCategoryId(res.data.data.getCategories[0]._id)
+        
 
        requestNotAddedBusiness(1);
        requestAddedBusiness(1, allCategories._id);
        requestNotCategorize(1)
        
       }catch(err){
-        console.log("the roor", err)
+        console.log("the roor", err.response)
       }  
     }
     fetchData();
   }, []);
 
   const makeSearch = async(added, filter) =>{
-    console.log(`the search Text ${searchValue}`)
     try{ 
       const { token } = await getUserData();
       const body = {
@@ -180,7 +180,7 @@ export default (props) => {
            ratioType
            customData{
              address
-             phoneNumber
+             phoneNo
              rating
            }
            uploadedPhotos{
@@ -237,11 +237,15 @@ export default (props) => {
   }
 
   const requestNotAddedBusiness = async(pageNumber) => {
-    console.log("innn", pageNumber)
     setShowNotAddedLoader(true)
+    try{
     const notAddedBusiness = await getAllBusiness(pageNumber, false, 'not');
     setShowNotAddedLoader(false)
     setNotAddedBusiness(notAddedBusiness)
+    }catch(err){
+      console.log("the error", err.response)
+    }
+   
   }
 
   const requestAddedBusiness = async(pageNumber, selectedCategory) => {
@@ -260,7 +264,6 @@ export default (props) => {
   
   const changeSearchValue = async(e, currentCase) => {
     if(e === ''){
-      console.log("in iff")
       if(currentCase === 'notAdded')
         requestNotAddedBusiness(1);
       else if(currentCase === 'added'){ 
@@ -283,7 +286,6 @@ export default (props) => {
     try{
       const businessAdd = await axios.post(`graphql?`,body);
       const isAdd =  businessAdd.data.data.addNotCategorizeBusiness
-      console.log("the is Adddd ed business", isAdd)
       if(isAdd)
         setSuccess(true)
       else
@@ -329,15 +331,31 @@ export default (props) => {
               history = {props.history} 
               message = {"Business Added SuccessFully"} 
             />
-          </CRow>  
+          </CRow> 
           <CRow className = "search-bar" >
-            <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
+            <CCol 
+              xs = {12} 
+              sm = {7} 
+              className = "searchedgrid" 
+            >
               <SearchField
                 placeholder="Search "
                 onChange={ (e)=> { changeSearchValue(e, 'notAdded')} }
                 className="search-bar-input"
                 onSearchClick = { ()=> {  getSearchResults('notAdded') } }
               />
+            </CCol>
+            <CCol 
+              xs = {12}
+              sm = {5}
+              className = "searchedgrid" 
+            >
+              <Link  
+                style = {{ backgroundColor: "#549bd4", color: "white", padding: 8, paddingTop: 12, paddingBottom: 12 }} 
+                to={`/addBusiness`} 
+              >
+                ADD Business
+              </Link>
             </CCol>
           </CRow>
             { showNotAddedLoader ?
@@ -365,7 +383,7 @@ export default (props) => {
           </CTabPane>
           <CTabPane data-tab="recentlyAdded">
           <CRow className = "search-bar" >
-            <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
+            <CCol xs = {12}  className = "searchedgrid" style = {{ textAlign: 'center' }} >
               <SearchField
                 placeholder="Search "
                 onChange={ (e)=> { changeSearchValue(e, 'added')} }
@@ -413,7 +431,10 @@ export default (props) => {
           </CTabPane>
           <CTabPane data-tab="notCategorize">
           <CRow>
-            <CCol xs = {12} style = {{ textAlign: 'center', marginTop: 40 }} >
+            <CCol xs = {12}
+              className = "searchedgrid" 
+              style = {{ textAlign: 'center' }}
+            >
               <SearchField
                 placeholder="Search "
                 onChange={ (e)=> { changeSearchValue(e, 'notCategorize')} }

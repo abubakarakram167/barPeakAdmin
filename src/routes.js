@@ -12,8 +12,8 @@ const LoginPage  = React.lazy(() => import('./components/LoginPage'));
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/business', name: 'Business', component: Business },
-  { path:'/addBusiness/:place_id/category/:category_id/auto/:auto_submit', name: 'AddBusiness', component: AddBusiness },
-  { path:'/updateBusiness/:place_id', name: 'UpdateBusiness', component: UpdateBusiness },
+  { path:'/addBusiness', name: 'AddBusiness', component: AddBusiness },
+  { path:'/updateBusiness/:id', name: 'UpdateBusiness', component: UpdateBusiness },
   { path:'/category', name: 'Category', component: Category },
   { path:'/user/updateRadius', name: 'updateRadius', component: UpdateRadius },  
   { path:'/categoryAdd/:id', name: 'CategoryForm', component: CategoryForm },

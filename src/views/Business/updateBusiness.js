@@ -8,10 +8,10 @@ import { useState, useEffect } from 'react';
 import BusinessEditForm from "../Forms/UpdateBusinessForm";
 export default (props) => {
   console.log("props", props)
-  const {place_id} = props.match.params
+  const {id} = props.match.params
   return(
   <div>
-    <BusinessEditForm placeId = { place_id }  history = {props.history} />  
+    <BusinessEditForm id = { id }  history = {props.history} />  
   </div>
   )
 }

@@ -73,7 +73,7 @@ import { Popconfirm, message } from 'antd';
               <div>
                 <Link className = "business-card" to={`categoryAdd/${category._id}`}>Edit</Link>
               </div>
-              <div style = {{ marginTop: 10 }} >
+              {/* <div style = {{ marginTop: 10 }} >
               <Popconfirm
                 title="Are you sure to delete this task?"
                 onConfirm={() =>confirm(category._id)}
@@ -88,7 +88,7 @@ import { Popconfirm, message } from 'antd';
               <CRow>
                 <Modal delete = {true} showPopup = {showPopup} success = {success} message = {"Category Deleted SuccessFully"} />
               </CRow>        
-              </div>
+              </div> */}
             </div>)
           }  
           <CCardText>

@@ -28,7 +28,8 @@
   color: #f5f4f2;
   position: absolute;
   top: 40%;
-  left: 38%
+  left: 38%;
+  font-size:12px;
 }
 .business-card-edit{
   background-color: #4e8fd0;
@@ -57,7 +58,7 @@
 }
 .button-grid-business{
   position: absolute;
-  top: 35%;
+  top: 30%;
   left: 38%
 }
 .complete-business-card{
@@ -74,6 +75,10 @@
 .search-bar{
   margin-bottom: 50px;
 }
+.searchedgrid{
+  text-align: center; 
+  margin-top: 40px; 
+ }
 
 .search-bar-input{
   width: '30%'
@@ -83,4 +88,16 @@
 }
 .carousel{
   display: none;
+}
+
+@media screen and (min-width: 992px) {
+  .searchedgrid{
+    text-align: end;
+   }
+}
+
+@media screen and (max-width: 520px) {
+  .pagination-style{
+    width: 80%;
+  }
 }

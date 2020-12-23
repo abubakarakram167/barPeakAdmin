@@ -11,17 +11,13 @@ import {
   CButton
  } from '@coreui/react'
 import axios from '../../api';
-import AxiosApi from 'axios';
 import { useState, useEffect } from 'react';
 import { getUserData } from '../../localStorage';
-import { Rating } from '@material-ui/lab';
-import BusinessCard from '../Business/BusinessCard';
 import _, { map } from 'underscore';
-import { ToastContainer } from 'react-toastify';
-import { MDBNotification } from "mdbreact";
 import { Alert } from 'antd';
 import Modal from '../../components/Modal';
 import Widget from '../../components/Widget';
+import './formContainer.css';
 
 export default (props) => {
   
@@ -146,7 +142,7 @@ export default (props) => {
   return(
     <div>
       
-      <CContainer style = {{ width: "50%" }}  >
+      <CContainer className = "form-container-width"  >
         <CRow>
           <Modal showPopup = {showPopup} success = {success} history = {props.history} message = {"Category Added SuccessFully"} />
         </CRow>
@@ -189,7 +185,9 @@ export default (props) => {
           </CRow>)
         }
         <CRow>
-          <CCol>
+          <CCol
+            style = {{ textAlign: 'center' }}
+          >
           <CButton
             style = {{ marginTop: 100, marginBottom: 50 }}
             color = "info"
