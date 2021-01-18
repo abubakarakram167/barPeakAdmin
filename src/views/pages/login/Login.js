@@ -57,7 +57,7 @@ const Login = (props) => {
     const body = {
       query:`
       query{
-        login(email: "${formData.email}", password: "${formData.password}")
+        adminLogin(email: "${formData.email}", password: "${formData.password}")
         {
           token,
           user{
@@ -69,15 +69,16 @@ const Login = (props) => {
             dob
           }
         }
-      }`
+      }
+      `
     }
     console.log("the form data", formData);
 
     if(validate()){
       axios.post(`graphql?`,body).then((res)=>{
         console.log("the response", res);
-        if(res.data.data.login){
-          storeUserData(res.data.data.login)
+        if(res.data.data.adminLogin){
+          storeUserData(res.data.data.adminLogin)
           props.history.push('/')
         }
       }).catch(err => {
