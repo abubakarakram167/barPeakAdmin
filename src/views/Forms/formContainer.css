@@ -14,3 +14,12 @@
   border: 1px solid black; 
   border-radius: 10px; 
 }
+
+.gender-breakdown-button{
+  background-color: transparent;
+  padding: 5px;
+  margin-left: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  max-width: 150px;
+}

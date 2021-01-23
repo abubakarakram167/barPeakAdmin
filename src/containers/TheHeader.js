@@ -106,11 +106,13 @@ const TheHeader = (props) => {
               <CIcon name="cil-settings" alt="Settings" />
               <div>
                 <CDropdown className="mt-2">
-                  <CDropdownToggle style = {{padding: 8, fontSize: 12 }} caret color="info">
+                  <CDropdownToggle 
+                    style = {{padding: 8, fontSize: 12 }} caret color="info"
+                  >
                     Settings
                   </CDropdownToggle>
                   <CDropdownMenu>
-                    <CDropdownItem header><Link to={`/user/updateRadius`} >Update Radius</Link></CDropdownItem>
+                    <CDropdownItem header><Link to={`/settings`} > Update Establishment Default </Link></CDropdownItem>
                   </CDropdownMenu>
                 </CDropdown>
               </div>

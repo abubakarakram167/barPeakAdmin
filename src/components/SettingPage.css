@@ -1,0 +1,65 @@
+.form-container-width{
+  width: 50%
+}
+@media screen and (max-width: 800px) {
+  .form-container-width{
+    width: 90%
+  }
+}
+
+.ratio-select{
+  margin-left: 20px; 
+  width: '70%'; 
+  padding: 5px; 
+  border: 1px solid black; 
+  border-radius: 10px; 
+}
+
+.labelText{
+  min-width: 200px;
+}
+.nonActiveweekDayNames{
+  margin-right: 5px;
+  padding: 4px;
+  border-radius: 15px;
+  background-color: #d4d8dc;
+  min-width: 50px;
+  text-align: center;
+}
+.activeWeekDayNames{
+  margin-right: 5px;
+  padding: 4px;
+  border-radius: 15px;
+  background-color: #707273;
+  min-width: 50px;
+  text-align: center;
+  color: white
+}
+.gender-breakdown-button{
+  background-color: transparent;
+  padding: 5px;
+  margin-left: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  max-width: 150px;
+}
+.schedule-text{
+  font-size: 20px;
+  background-color: #ebedef;
+  padding: 20px;
+  font-weight: 600;
+}
+.submit-button{ 
+  margin-top: 100;
+  margin-bottom: 50; 
+  text-align: 'center'; 
+}
+
+.show-error-message{
+  font-weight: 800;
+  font-size: 10px;
+  width: 55%;
+  padding: 10px;
+  background-color: #f18e8e;
+  border-radius: 10px
+}

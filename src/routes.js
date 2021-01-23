@@ -8,6 +8,7 @@ const Business = React.lazy(() => import('./views/Business/Business'));
 const Category = React.lazy(() => import('./views/Category/Category'));
 const CategoryForm = React.lazy(() => import('./views/Forms/CategoryForm'));
 const LoginPage  = React.lazy(() => import('./components/LoginPage'));
+const SettingPage = React.lazy(() => import('./components/SettingPage'));
 
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -17,7 +18,7 @@ const routes = [
   { path:'/category', name: 'Category', component: Category },
   { path:'/user/updateRadius', name: 'updateRadius', component: UpdateRadius },  
   { path:'/categoryAdd/:id', name: 'CategoryForm', component: CategoryForm },
-        
+  { path:'/settings', name: 'SettingPage', component: SettingPage },      
 ];
 
 export default routes;

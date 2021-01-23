@@ -81,7 +81,6 @@ export default (props) => {
             name
             totalUserCountRating
             ageInterval
-            ratioType
             customData{
               address
               phoneNo
@@ -177,7 +176,6 @@ export default (props) => {
            name
            totalUserCountRating
            ageInterval
-           ratioType
            customData{
              address
              phoneNo

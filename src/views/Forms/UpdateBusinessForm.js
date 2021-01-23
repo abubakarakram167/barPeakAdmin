@@ -26,13 +26,14 @@ export default (props) => {
   const [allCateogories, setCategories]=useState([]);
   const [isBar, setBar]=useState(false);
   const [formData, setFormData] = useState({ uploadedPhotos: [], newPhotos: [] });
-  const [ratingData, setRatingData] = useState({});
+  const [ratingData, setRatingData] = useState(null);
   const [googleDetailData, setGoogleDetailData] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [success, setSuccess] = useState(true); 
   const [error, setError] = useState({})
   const [customField, setCustomField] = useState(false);
-  const [specificBusinessCategory, setSpecificBusinessCategory] = useState([])
+  const [specificBusinessCategory, setSpecificBusinessCategory] = useState([]);
+  const [currentGenderBreakDown, setCurrentGenderBreakDown] = useState("Equal Girls and Guys");
   const selectedcategoryIds = []
 
   const onChange = (event) => {
@@ -72,6 +73,8 @@ export default (props) => {
   
   const onChangeRating = (event) => {
     const { name, value } = event.target;
+    if(name === "ratioInput")
+      setCurrentGenderBreakDown(getGenderBreakDownValue(value))  
     setRatingData(prevState => ({ ...prevState, [name]: value }));
   }
 
@@ -147,7 +150,6 @@ export default (props) => {
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
               },
-              ratioType: "${formData.ratioType}",
               customData:{
                 rating: ${customData.rating},
                 address: "${customData.address}"
@@ -171,6 +173,7 @@ export default (props) => {
           setShowPopup(true)
         } 
       }catch(err){
+        console.log("the error", err)
         setShowPopup(true)
         setSuccess(false);
         
@@ -178,6 +181,19 @@ export default (props) => {
     }
   }
   
+  const getGenderBreakDownValue = (value) => {
+    console.log("the value", value)
+    let genderBreakDownValue ;
+    if(parseInt(value) === 1)
+      genderBreakDownValue = "Equal Girls and Guys";
+    else if (parseInt(value) === 2 )
+      genderBreakDownValue = "More Guys than Girls";
+    else
+      genderBreakDownValue = "More Girls than Guys";
+    
+    console.log("the gender breakdown", genderBreakDownValue)  
+    return genderBreakDownValue;
+  }
 
   useEffect(() => {
     const fetchData = async() => {
@@ -214,7 +230,6 @@ export default (props) => {
             name
             totalUserCountRating
             ageInterval
-            ratioType
             customData{
               address
               phoneNo
@@ -458,21 +473,6 @@ export default (props) => {
                         })
                       }
                   </Row> 
-                  {/* <select 
-                    onChange = { onChange } 
-                    name = "barCategory"
-                    value = { !_.isEmpty(formData) && formData.barCategory &&formData.barCategory._id }
-                    style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
-                  >
-                    { allCateogories.map((category)=>{
-                        if(category.type === "sub_bar"){
-                          return(
-                            <option value = {category._id}>{ category.title }</option>
-                          );
-                        }  
-                      })
-                    }
-                  </select> */}
                   {error.barcategory &&  <Alert message="category is required" type="error" />  }
                   <CFormText className="help-block">Please Select Bar Category</CFormText>
                 </CFormGroup>)
@@ -492,49 +492,82 @@ export default (props) => {
                 <CFormText className="help-block">Please Select Age</CFormText>
               </CFormGroup>
               <p style = {{ fontSize: 20 }} >Rating:</p>
-              <CFormGroup>
-                <CLabel style = {{ fontSize: 20 }} > Fun :</CLabel>
-                <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name="fun"  value = { ratingData.fun ? ratingData.fun : 5  } onChange = { onChangeRating } size="large" precision = {0.1} max = {5} />
-                </span>  
-                <span style = {{ marginLeft: 30, fontSize: 20 }} > { ratingData.fun } </span>
-                <hr />
+              { ratingData &&
+                <CFormGroup>
+                  <CLabel style = {{ fontSize: 20 }} > Fun :</CLabel>
+                  <span style = {{ position: 'relative', top: 5, left: 20 }} >
+                    <Rating 
+                      name="fun"  
+                      value = { ratingData.fun } 
+                      onChange = { onChangeRating } 
+                      size="large" 
+                      max = {5}
+                      precision = {0.1} 
+                    />
+                  </span>  
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} > { ratingData.fun } </span>
+                  <hr />
 
-                <CLabel style = {{ fontSize: 20 }} > Crowd :</CLabel>
-                <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name="crowd" value = { ratingData.crowd ? ratingData.crowd : 5  }  onChange = {onChangeRating } size="large" precision = {0.1} max = {5} />
-                </span>  
-                <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.crowd }</span>
-                <hr />
+                  <CLabel style = {{ fontSize: 20 }} > Crowd :</CLabel>
+                  <span style = {{ position: 'relative', top: 5, left: 20 }} >
+                    <Rating 
+                      name="crowd" 
+                      value = { ratingData.crowd  }  
+                      onChange = {onChangeRating } 
+                      size="large" 
+                      max = {5}
+                      precision = {0.1}  
+                    />
+                  </span>  
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.crowd }</span>
+                  <hr />
+                  <CLabel style = {{ fontSize: 20 }} > Gender BreakDown :</CLabel>
+                  <span style = {{ position: 'relative', top: 5, left: 20 }} >
+                    <Rating 
+                      name="ratioInput" 
+                      value={ratingData.ratioInput} 
+                      onChange = {onChangeRating} 
+                      size="large" 
+                      max = {3}
+                        
+                    />
+                  </span>  
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.ratioInput }</span>
+                  <CButton
+                    className = "gender-breakdown-button"  
+                  >
+                    {currentGenderBreakDown}
+                  </CButton> 
+                  <hr />
 
-                <select 
-                  onChange = {onChange } 
-                  name = "ratioType"
-                  value = { formData.ratioType }
-                  className = "ratio-select" 
-                >
-                  <option selected value="girl">girlToGuyRatio</option>
-                  <option value="boy">boyToGirlRatio</option>
-                </select>
-                <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name="ratioInput" value={ratingData.ratioInput} onChange = {onChangeRating} size="large" precision = {0.1} max = {5} />
-                </span>  
-                <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.ratioInput }</span>
-                <hr />
+                  <CLabel style = {{ fontSize: 20 }} > difficultyGettingIn :</CLabel>
+                  <span style = {{ position: 'relative', top: 5, left: 20 }} >
+                    <Rating 
+                      name = "difficultyGettingIn" 
+                      value = { ratingData.difficultyGettingIn }  
+                      onChange = {onChangeRating} 
+                      size="large" 
+                      max = {5}
+                      precision = {0.1}  
+                    />
+                  </span>  
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.difficultyGettingIn }</span>
+                  <hr />
 
-                <CLabel style = {{ fontSize: 20 }} > difficultyGettingIn :</CLabel>
-                <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name = "difficultyGettingIn" value = { ratingData.difficultyGettingIn ? ratingData.difficultyGettingIn : 5  }  onChange = {onChangeRating} size="large" precision = {0.1} max = {5} />
-                </span>  
-                <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.difficultyGettingIn }</span>
-                <hr />
-
-                <CLabel style = {{ fontSize: 20 }} > difficultyGettingDrink :</CLabel>
-                <span style = {{ position: 'relative', top: 5, left: 20 }} >
-                  <Rating name = "difficultyGettingDrink" value = { ratingData.difficultyGettingDrink ? ratingData.difficultyGettingDrink : 5  }  onChange = {onChangeRating} size="large" precision = {0.1} max = {5} />
-                </span>  
-                <span style = {{ marginLeft: 10, fontSize: 20 }} > { ratingData.difficultyGettingDrink } </span>   
-              </CFormGroup>
+                  <CLabel style = {{ fontSize: 20 }} > difficultyGettingDrink :</CLabel>
+                  <span style = {{ position: 'relative', top: 5, left: 20 }} >
+                    <Rating 
+                      name = "difficultyGettingDrink" 
+                      value = { ratingData.difficultyGettingDrink }  
+                      onChange = {onChangeRating} 
+                      size="large" 
+                      max = {5} 
+                      precision = {0.1} 
+                    />
+                  </span>  
+                  <span style = {{ marginLeft: 10, fontSize: 20 }} > { ratingData.difficultyGettingDrink } </span>   
+                </CFormGroup>
+              }
             </CForm>
           </CCol>
         </CRow>
@@ -549,7 +582,6 @@ export default (props) => {
           >
             Edit Restaurant
           </CButton>
-          {/* <input type = "submit" />    */}
           </CCol>
         </CRow>
       </CContainer>    
