@@ -498,41 +498,41 @@ export default (props) => {
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name="fun"  
-                      value = { ratingData.fun } 
+                      value = { parseFloat(ratingData.fun).toFixed(1) } 
                       onChange = { onChangeRating } 
                       size="large" 
                       max = {5}
                       precision = {0.1} 
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} > { ratingData.fun } </span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} > { parseFloat(ratingData.fun).toFixed(1) } </span>
                   <hr />
 
                   <CLabel style = {{ fontSize: 20 }} > Crowd :</CLabel>
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name="crowd" 
-                      value = { ratingData.crowd  }  
+                      value = { parseFloat(ratingData.crowd).toFixed(1) }  
                       onChange = {onChangeRating } 
                       size="large" 
                       max = {5}
                       precision = {0.1}  
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.crowd }</span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseFloat(ratingData.crowd).toFixed(1) }</span>
                   <hr />
                   <CLabel style = {{ fontSize: 20 }} > Gender BreakDown :</CLabel>
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name="ratioInput" 
-                      value={ratingData.ratioInput} 
+                      value={parseFloat(ratingData.ratioInput ).toFixed(1)} 
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {3}
                         
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.ratioInput }</span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseFloat(ratingData.ratioInput ).toFixed(1) }</span>
                   <CButton
                     className = "gender-breakdown-button"  
                   >
@@ -544,28 +544,28 @@ export default (props) => {
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name = "difficultyGettingIn" 
-                      value = { ratingData.difficultyGettingIn }  
+                      value = { parseFloat(ratingData.difficultyGettingIn ).toFixed(1) }  
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {5}
                       precision = {0.1}  
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ ratingData.difficultyGettingIn }</span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseFloat(ratingData.difficultyGettingIn ).toFixed(1) }</span>
                   <hr />
 
                   <CLabel style = {{ fontSize: 20 }} > difficultyGettingDrink :</CLabel>
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name = "difficultyGettingDrink" 
-                      value = { ratingData.difficultyGettingDrink }  
+                      value = { parseFloat(ratingData.difficultyGettingDrink ).toFixed(1) }  
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {5} 
                       precision = {0.1} 
                     />
                   </span>  
-                  <span style = {{ marginLeft: 10, fontSize: 20 }} > { ratingData.difficultyGettingDrink } </span>   
+                  <span style = {{ marginLeft: 10, fontSize: 20 }} > {parseFloat(ratingData.difficultyGettingDrink ).toFixed(1)} </span>   
                 </CFormGroup>
               }
             </CForm>
