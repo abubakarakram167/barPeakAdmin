@@ -454,22 +454,22 @@ export default (props) => {
                   <CLabel >Bar Category</CLabel>
                   <Row>
                     { allCateogories.map((category)=>{
-                          if(category.type === "sub_bar"){
-                            return(
-                              <Col span={8}>
-                                <label>
-                                  <input 
-                                    type="checkbox" 
-                                    name = "barCategory" 
-                                    value = { category._id } 
-                                    defaultChecked={isSelected(category._id)} 
-                                    onChange={onChangeCategory} 
-                                  />
-                                  {category.title}
-                                </label>
-                              </Col>
-                            );
-                          }  
+                        if(category.type === "sub_bar"){
+                          return(
+                            <Col span={8}>
+                              <label>
+                                <input 
+                                  type="checkbox" 
+                                  name = "barCategory" 
+                                  value = { category._id } 
+                                  defaultChecked={isSelected(category._id)} 
+                                  onChange={onChangeCategory} 
+                                />
+                                {category.title}
+                              </label>
+                            </Col>
+                          );
+                        }  
                         })
                       }
                   </Row> 
@@ -498,41 +498,41 @@ export default (props) => {
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name="fun"  
-                      value = { parseFloat(ratingData.fun).toFixed(1) } 
+                      value = { parseInt(ratingData.fun) } 
                       onChange = { onChangeRating } 
                       size="large" 
                       max = {5}
                       precision = {0.1} 
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} > { parseFloat(ratingData.fun).toFixed(1) } </span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} > { parseInt(ratingData.fun) } </span>
                   <hr />
 
                   <CLabel style = {{ fontSize: 20 }} > Crowd :</CLabel>
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name="crowd" 
-                      value = { parseFloat(ratingData.crowd).toFixed(1) }  
+                      value = { parseInt(ratingData.crowd) }  
                       onChange = {onChangeRating } 
                       size="large" 
                       max = {5}
                       precision = {0.1}  
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseFloat(ratingData.crowd).toFixed(1) }</span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseInt(ratingData.crowd) }</span>
                   <hr />
                   <CLabel style = {{ fontSize: 20 }} > Gender BreakDown :</CLabel>
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name="ratioInput" 
-                      value={parseFloat(ratingData.ratioInput ).toFixed(1)} 
+                      value={parseInt(ratingData.ratioInput )} 
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {3}
                         
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseFloat(ratingData.ratioInput ).toFixed(1) }</span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseInt(ratingData.ratioInput ) }</span>
                   <CButton
                     className = "gender-breakdown-button"  
                   >
@@ -544,28 +544,28 @@ export default (props) => {
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name = "difficultyGettingIn" 
-                      value = { parseFloat(ratingData.difficultyGettingIn ).toFixed(1) }  
+                      value = { parseInt(ratingData.difficultyGettingIn ) }  
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {5}
                       precision = {0.1}  
                     />
                   </span>  
-                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseFloat(ratingData.difficultyGettingIn ).toFixed(1) }</span>
+                  <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseInt(ratingData.difficultyGettingIn ) }</span>
                   <hr />
 
                   <CLabel style = {{ fontSize: 20 }} > difficultyGettingDrink :</CLabel>
                   <span style = {{ position: 'relative', top: 5, left: 20 }} >
                     <Rating 
                       name = "difficultyGettingDrink" 
-                      value = { parseFloat(ratingData.difficultyGettingDrink ).toFixed(1) }  
+                      value = { parseInt(ratingData.difficultyGettingDrink ) }  
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {5} 
                       precision = {0.1} 
                     />
                   </span>  
-                  <span style = {{ marginLeft: 10, fontSize: 20 }} > {parseFloat(ratingData.difficultyGettingDrink ).toFixed(1)} </span>   
+                  <span style = {{ marginLeft: 10, fontSize: 20 }} > {parseInt(ratingData.difficultyGettingDrink )} </span>   
                 </CFormGroup>
               }
             </CForm>

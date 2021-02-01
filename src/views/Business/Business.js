@@ -297,7 +297,7 @@ export default (props) => {
 
   return (
     <div>
-      <CTabs activeTab="addBusiness">
+      <CTabs activeTab="recentlyAdded">
         <CNav variant="tabs">
           <CNavItem>
             <CNavLink data-tab="addBusiness">
