@@ -413,7 +413,6 @@ export default (props) => {
                     value = { ratingData.crowd  }  
                     onChange = {onChangeRating } 
                     size="large" 
-                    precision = {0.1} 
                     max = {5} 
                   />
                 </span>  
@@ -443,7 +442,6 @@ export default (props) => {
                     name = "difficultyGettingIn" 
                     value = { ratingData.difficultyGettingIn }  
                     onChange = {onChangeRating} size="large" 
-                    precision = {0.1} 
                     max = {5} 
                   />
                 </span>  
@@ -457,7 +455,6 @@ export default (props) => {
                     value = { ratingData.difficultyGettingDrink }  
                     onChange = {onChangeRating} 
                     size="large" 
-                    precision = {0.1} 
                     max = {5} 
                   />
                 </span>  
