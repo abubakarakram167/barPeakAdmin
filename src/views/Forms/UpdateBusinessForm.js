@@ -502,7 +502,6 @@ export default (props) => {
                       onChange = { onChangeRating } 
                       size="large" 
                       max = {5}
-                      precision = {0.1} 
                     />
                   </span>  
                   <span style = {{ marginLeft: 30, fontSize: 20 }} > { parseInt(ratingData.fun) } </span>
@@ -516,7 +515,6 @@ export default (props) => {
                       onChange = {onChangeRating } 
                       size="large" 
                       max = {5}
-                      precision = {0.1}  
                     />
                   </span>  
                   <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseInt(ratingData.crowd) }</span>
@@ -548,7 +546,6 @@ export default (props) => {
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {5}
-                      precision = {0.1}  
                     />
                   </span>  
                   <span style = {{ marginLeft: 30, fontSize: 20 }} >{ parseInt(ratingData.difficultyGettingIn ) }</span>
@@ -562,7 +559,6 @@ export default (props) => {
                       onChange = {onChangeRating} 
                       size="large" 
                       max = {5} 
-                      precision = {0.1} 
                     />
                   </span>  
                   <span style = {{ marginLeft: 10, fontSize: 20 }} > {parseInt(ratingData.difficultyGettingDrink )} </span>   
