@@ -269,8 +269,7 @@ export default (props) => {
                   showSecond = {true}
                   
                 />
-                { error.endScheduleTime && <CFormText className = "show-error-message" color = "white" > Ending Time Should Be greater Than Starting Time.</CFormText> }
-                
+                { error.endScheduleTime && <CFormText className = "show-error-message" color = "white" > Ending Time Should Be greater Than Starting Time.</CFormText> }     
               </CFormGroup>
               <p style = {{ fontSize: 20 }} >Weekly Default Rating Setting:</p>
               <CFormGroup>

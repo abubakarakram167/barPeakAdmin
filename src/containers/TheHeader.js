@@ -113,6 +113,7 @@ const TheHeader = (props) => {
                   </CDropdownToggle>
                   <CDropdownMenu>
                     <CDropdownItem header><Link to={`/settings`} > Update Establishment Default </Link></CDropdownItem>
+                    <CDropdownItem header><Link to={`/vibeCategoryPinColor`} > Update VibeCategory Color </Link></CDropdownItem>
                   </CDropdownMenu>
                 </CDropdown>
               </div>
