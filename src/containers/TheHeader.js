@@ -83,6 +83,19 @@ const TheHeader = (props) => {
         <TheHeaderDropdownTasks/>
         <TheHeaderDropdownMssg/>
         <TheHeaderDropdown/>
+        <div>
+          <CDropdown className="mt-2">
+            <CDropdownToggle 
+              style = {{padding: 8, fontSize: 10, marginBottom: 5 }} caret color="info"
+            >
+              Settings
+            </CDropdownToggle>
+            <CDropdownMenu>
+              {/* <CDropdownItem header><Link to={`/settings`} > Update Establishment Default </Link></CDropdownItem> */}
+              <CDropdownItem header><Link to={`/vibeCategoryPinColor`} > Update VibeCategory Color </Link></CDropdownItem>
+            </CDropdownMenu>
+          </CDropdown>
+        </div>
         <CButton className = "logout-button" onClick = {() => logout()} > Log Out </CButton>
       </CHeaderNav>
 
@@ -104,19 +117,6 @@ const TheHeader = (props) => {
             </CLink>
             <CLink className="c-subheader-nav-link" href="#">
               <CIcon name="cil-settings" alt="Settings" />
-              <div>
-                <CDropdown className="mt-2">
-                  <CDropdownToggle 
-                    style = {{padding: 8, fontSize: 12 }} caret color="info"
-                  >
-                    Settings
-                  </CDropdownToggle>
-                  <CDropdownMenu>
-                    <CDropdownItem header><Link to={`/settings`} > Update Establishment Default </Link></CDropdownItem>
-                    <CDropdownItem header><Link to={`/vibeCategoryPinColor`} > Update VibeCategory Color </Link></CDropdownItem>
-                  </CDropdownMenu>
-                </CDropdown>
-              </div>
             </CLink>
           </div>
       </CSubheader>
