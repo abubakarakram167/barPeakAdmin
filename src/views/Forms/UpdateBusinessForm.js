@@ -21,6 +21,43 @@ import { Row, Col } from 'antd';
 import BusinessCarousel from '../Business/BusinesCarousel';
 import Widget from '../../components/Widget';
 import './formContainer.css';
+
+const weekDays = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+const hoursPerDay = [
+  "1000",
+  "1100",
+  "1200",
+  "1300",
+  "1400",
+  "1500",
+  "1600",
+  "1700",
+  "1800",
+  "1900",
+  "2000",
+  "2100",
+  "2200",
+  "2300",
+  "0000",
+  "0100",
+  "0200",
+  "0300",
+  "0400",
+  "0500",
+  "0600",
+  "0700",
+  "0800",
+  "0900",
+]
+
 export default (props) => {
   
   const [allCateogories, setCategories]=useState([]);
@@ -35,6 +72,10 @@ export default (props) => {
   const [specificBusinessCategory, setSpecificBusinessCategory] = useState([]);
   const [currentGenderBreakDown, setCurrentGenderBreakDown] = useState("Equal Girls and Guys");
   const selectedcategoryIds = []
+  const [openingHours, setOpeningHours] = useState([]);
+  const [ currentWeekDayName, setCurrentWeekDayName ] = useState('');
+  const [ currentOpenTime, setCurrentOpenTime ] = useState('');
+  const [ currentCloseTime, setCurrentCloseTime ] = useState('');
 
   const onChange = (event) => {
     const { name, value } = event.target;
@@ -157,12 +198,13 @@ export default (props) => {
                 longitude: ${customData.longitude},
                 phoneNo: "${customData.phoneNo}"
               },
+              openingHours: "${JSON.stringify(openingHours).replace(/"/g, '\\"') }" 
               photos: "${allPhotos}" 
           })
           {
             name
           }
-      }
+        }
         `
       }
       try{
@@ -173,7 +215,7 @@ export default (props) => {
           setShowPopup(true)
         } 
       }catch(err){
-        console.log("the error", err)
+        console.log("the error", err.response)
         setShowPopup(true)
         setSuccess(false);
         
@@ -191,7 +233,6 @@ export default (props) => {
     else
       genderBreakDownValue = "More Girls than Guys";
     
-    console.log("the gender breakdown", genderBreakDownValue)  
     return genderBreakDownValue;
   }
 
@@ -250,6 +291,18 @@ export default (props) => {
               rating
               url
               types
+              opening_hours{
+                periods{
+                  close{
+                    day,
+                    time
+                  },
+                  open{
+                    day,
+                    time
+                  }
+                }
+              }
             }
           }}
           `
@@ -277,7 +330,41 @@ export default (props) => {
           if(category.title === 'Bar')
             setBar(true)  
         })
-       
+        let openingHours = [];
+        if(singleBusiness && 
+          singleBusiness.googleBusiness && 
+          singleBusiness.googleBusiness.opening_hours && 
+          singleBusiness.googleBusiness.opening_hours.periods.length 
+        ){
+          openingHours = singleBusiness.googleBusiness.opening_hours.periods;
+        }else if(singleBusiness) {
+          let increment = false ;
+          openingHours = weekDays.map((dayName, index)=> {
+            if(index === 6){
+              index = -1
+              increment = true
+            }
+            else {
+              increment = false
+            }
+              
+            return {
+              close: {
+                day: (index + 1) .toString(),
+                time: "0200"
+              },
+              open: {
+                day:  increment ? "6" : index.toString(),
+                time: "1100"
+              }
+            }
+          })
+        }
+        // console.log("the open time", openingHours[0].open.time)
+        setCurrentOpenTime(openingHours[0].open.time.toString())
+        setCurrentCloseTime(openingHours[0].close.time.toString())
+        setCurrentWeekDayName( parseInt(openingHours[0].open.day))
+        setOpeningHours(openingHours)
         setRatingData(singleBusiness.rating);
         setSpecificBusinessCategory(singleBusiness.category)
         singleBusiness.category = singleBusiness.category.map(category => category._id)
@@ -286,7 +373,7 @@ export default (props) => {
         setGoogleDetailData(singleBusiness.googleBusiness)
         setCategories(allSpecificCategories);
       }catch(err){
-        console.log("the error", err);
+        console.log("the error..... is", err.response.data)
       }
     }
     fetchData();
@@ -297,10 +384,74 @@ export default (props) => {
     return formDataCategoryIds.includes(categoryId);
   }
 
+  const onChangeTime = (event => {
+    let changeOpeningHours = ''
+    if(event.target.name === "weekDayName"){
+      setCurrentWeekDayName(parseInt(event.target.value))
+      openingHours.map(day => {      
+        if(parseInt(day.open.day) === parseInt (event.target.value)){
+          setCurrentOpenTime(day.open.time)
+          setCurrentCloseTime(day.close.time)
+        }
+      })
+    }
+    else if(event.target.name === "weekDayOpenTime"){
+      openingHours.map(day => {
+        if(parseInt(day.open.day) === currentWeekDayName){
+          setCurrentOpenTime(event.target.value)
+        }
+      })
+      changeOpeningHours = openingHours.map(day => {
+        if(parseInt(day.open.day) === currentWeekDayName){
+          return {
+            open: {
+              day: currentWeekDayName.toString(),
+              time: event.target.value
+            },
+            close: {
+              day: day.close.day,
+              time: day.close.time
+            }
+          }
+        }
+        else 
+          return day
+      })
+      setOpeningHours(changeOpeningHours)
+    }
+
+    else if(event.target.name === "weekDayCloseTime"){
+      openingHours.map(day => {
+        if(parseInt(day.open.day) === currentWeekDayName){
+          setCurrentCloseTime(event.target.value)
+        }
+      })
+      changeOpeningHours = openingHours.map(day => {
+        if(parseInt(day.open.day) === currentWeekDayName){
+          return {
+            open: {
+              day: day.open.day,
+              time: day.open.time
+            },
+            close: {
+              day: day.close.day,
+              time: event.target.value
+            }
+          }
+        }
+        else 
+          return day
+      })
+      setOpeningHours(changeOpeningHours)
+    }
+  })
+
   let photos = formData.uploadedPhotos && formData.uploadedPhotos.length>0 && formData.uploadedPhotos[0].secure_url ? formData.uploadedPhotos: null
   if(formData.newPhotos && formData.newPhotos.length>0)
     photos = null
-  
+  let dataTo = openingHours.toString()
+  // console.log("the opening Hours......", JSON.stringify(openingHours))
+  // console.log("after object split", dataTo.split(''))
   return(
     <div>
       <CContainer className = "form-container-width" >
@@ -490,6 +641,53 @@ export default (props) => {
                   <option value="all">All</option>
                 </select>
                 <CFormText className="help-block">Please Select Age</CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel >Establishment Hours</CLabel>
+                <select 
+                  onChange = {onChangeTime } 
+                  name = "weekDayName"
+                  value = {currentWeekDayName}
+                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                >
+                  { 
+                    openingHours.length && openingHours.map((weekDay, index) => {
+                      const { open } = weekDay;
+                      return (<option selected value= { parseInt(open.day) }> { weekDays[parseInt(open.day)]  }</option>)
+                    })  
+                  }       
+                </select>
+                <CFormText className="help-block">Please Select Age</CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel >Open</CLabel>
+                <select 
+                  onChange = {onChangeTime} 
+                  name = "weekDayOpenTime"
+                  value = {currentOpenTime}
+                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                >
+                  { hoursPerDay.map((timeDay, index) => {
+                    return (<option selected value= { timeDay }> { timeDay  }</option>)
+                  })  
+                  }
+                </select>
+                <CFormText className="help-block">Please Select Opening Time</CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel >Close</CLabel>
+                <select 
+                  onChange = {onChangeTime} 
+                  name = "weekDayCloseTime"
+                  value = {currentCloseTime}
+                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                >
+                  { hoursPerDay.map((timeDay, index) => {
+                    return (<option selected value= { timeDay }> { timeDay  }</option>)
+                  })  
+                  }
+                </select>
+                <CFormText className="help-block">Please Select Closing Time</CFormText>
               </CFormGroup>
               <p style = {{ fontSize: 20 }} >Rating:</p>
               { ratingData &&
