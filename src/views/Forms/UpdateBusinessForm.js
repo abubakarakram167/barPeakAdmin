@@ -21,6 +21,7 @@ import { Row, Col } from 'antd';
 import BusinessCarousel from '../Business/BusinesCarousel';
 import Widget from '../../components/Widget';
 import './formContainer.css';
+import moment from 'moment';
 
 const weekDays = [
   "sunday",
@@ -72,6 +73,7 @@ export default (props) => {
   const [specificBusinessCategory, setSpecificBusinessCategory] = useState([]);
   const [currentGenderBreakDown, setCurrentGenderBreakDown] = useState("Equal Girls and Guys");
   const selectedcategoryIds = []
+  const [openingHoursFormat, setOpeningHoursFormat] = useState([]);
   const [openingHours, setOpeningHours] = useState([]);
   const [ currentWeekDayName, setCurrentWeekDayName ] = useState('');
   const [ currentOpenTime, setCurrentOpenTime ] = useState('');
@@ -190,6 +192,7 @@ export default (props) => {
                 ratioInput: ${ratingData.ratioInput}
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
+                createdAt: "${moment().format("YYYY-MM-DD HH:mm:ss")}"
               },
               customData:{
                 rating: ${customData.rating},
@@ -257,16 +260,16 @@ export default (props) => {
             _id
             placeId
             category{
-                title
-                _id
+              title
+              _id
             }    
             name
             rating{
-                fun,
-                crowd,
-                ratioInput,
-                difficultyGettingIn,
-                difficultyGettingDrink
+              fun,
+              crowd,
+              ratioInput,
+              difficultyGettingIn,
+              difficultyGettingDrink
             }
             name
             totalUserCountRating
@@ -365,6 +368,7 @@ export default (props) => {
         setCurrentCloseTime(openingHours[0].close.time.toString())
         setCurrentWeekDayName( parseInt(openingHours[0].open.day))
         setOpeningHours(openingHours)
+        setOpeningHoursFormat( getSpecificTimingPerWeekFormat(singleBusiness.googleBusiness.opening_hours))
         setRatingData(singleBusiness.rating);
         setSpecificBusinessCategory(singleBusiness.category)
         singleBusiness.category = singleBusiness.category.map(category => category._id)
@@ -373,11 +377,42 @@ export default (props) => {
         setGoogleDetailData(singleBusiness.googleBusiness)
         setCategories(allSpecificCategories);
       }catch(err){
-        console.log("the error..... is", err.response.data)
+        console.log("the error..... is", err)
       }
     }
     fetchData();
   }, []);
+
+  const getDayNumber = (number) => {
+    return parseInt(number)
+  }
+
+
+  const  getSpecificTimingPerWeekFormat = (openingHours)=> {
+    let schedulePerWeek = [];
+    const daysPerWeek = [0,1,2,3,4,5,6];
+    if(openingHours&& openingHours.periods.length){  
+      openingHours.periods.map(period=> {
+        let day = {};
+        day.openName = weekDays[getDayNumber(period.open.day)]
+        day.open = period.open.time
+        day.closeName = weekDays[ 2]
+        day.close = period.close.time
+        schedulePerWeek.push(day)
+      })
+    }
+    else {
+      let dayObject = {};
+      daysPerWeek.map( day => {
+        dayObject.openName = weekDays[day];
+        dayObject.closeName = weekDays[day];
+        dayObject.open =  "11:00"
+        dayObject.close = "22:00"
+        schedulePerWeek.push(dayObject)
+      })
+    }
+    return schedulePerWeek;
+  }
 
   const isSelected = (categoryId) => {
     let formDataCategoryIds = formData.category
@@ -386,6 +421,7 @@ export default (props) => {
 
   const onChangeTime = (event => {
     let changeOpeningHours = ''
+    let displayChanged = {};
     if(event.target.name === "weekDayName"){
       setCurrentWeekDayName(parseInt(event.target.value))
       openingHours.map(day => {      
@@ -418,6 +454,8 @@ export default (props) => {
           return day
       })
       setOpeningHours(changeOpeningHours)
+      displayChanged.periods = changeOpeningHours
+      setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
     }
 
     else if(event.target.name === "weekDayCloseTime"){
@@ -452,6 +490,7 @@ export default (props) => {
   let dataTo = openingHours.toString()
   // console.log("the opening Hours......", JSON.stringify(openingHours))
   // console.log("after object split", dataTo.split(''))
+  console.log("the opening hours", openingHoursFormat)
   return(
     <div>
       <CContainer className = "form-container-width" >
@@ -643,23 +682,56 @@ export default (props) => {
                 <CFormText className="help-block">Please Select Age</CFormText>
               </CFormGroup>
               <CFormGroup>
-                <CLabel >Establishment Hours</CLabel>
-                <select 
-                  onChange = {onChangeTime } 
-                  name = "weekDayName"
-                  value = {currentWeekDayName}
-                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
-                >
-                  { 
-                    openingHours.length && openingHours.map((weekDay, index) => {
-                      const { open } = weekDay;
-                      return (<option selected value= { parseInt(open.day) }> { weekDays[parseInt(open.day)]  }</option>)
-                    })  
-                  }       
-                </select>
-                <CFormText className="help-block">Please Select Age</CFormText>
+                <CLabel style = {{ fontWeight:800 }} >
+                  Establishment Hours
+                </CLabel>
+                { openingHoursFormat && openingHoursFormat.map((timing)=>{
+                  console.log(`the timing open is ${timing.open } and close: ${timing.close}`)   
+                    var openTime = timing.open.substr(0,2)+":"+timing.open.substr(2);
+                    var closeTime = timing.close.substr(0,2)+":"+timing.close.substr(2);
+                    
+                    return (
+                      <div> 
+                        On { timing.openName.charAt(0).toUpperCase() + timing.openName.slice(1) + " " } 
+                        <select 
+                          onChange = {onChangeTime} 
+                          name = "weekDayOpenTime"
+                          value = { timing.open }
+                          style = {{ 
+                            marginLeft: 20, 
+                            marginRight: 20,
+                            width: '30%', 
+                            padding: 5, 
+                            border: '1px solid black', 
+                            borderRadius: 10 
+                          }} 
+                        >
+                          { hoursPerDay.map((timeDay, index) => {
+                            var openTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
+                            return (<option selected value= { timeDay }> { moment(openTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
+                          })  
+                          }
+                        </select>
+                        <span>  -- </span>     
+                        <select 
+                          onChange = {onChangeTime} 
+                          name = "weekDayCloseTime"
+                          value = { timing.close }
+                          style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                        >
+                          { hoursPerDay.map((timeDay, index) => {
+                            var closeTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
+                            return (<option selected value= { timeDay }> { moment(closeTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
+                          })  
+                          }
+                        </select>
+                      </div>
+                    );
+                  })
+                }  
+                <CFormText className="help-block" style = {{ fontWeight: 600 }} >Please Update Establishment Timings.</CFormText>
               </CFormGroup>
-              <CFormGroup>
+              {/* <CFormGroup>
                 <CLabel >Open</CLabel>
                 <select 
                   onChange = {onChangeTime} 
@@ -688,7 +760,7 @@ export default (props) => {
                   }
                 </select>
                 <CFormText className="help-block">Please Select Closing Time</CFormText>
-              </CFormGroup>
+              </CFormGroup> */}
               <p style = {{ fontSize: 20 }} >Rating:</p>
               { ratingData &&
                 <CFormGroup>

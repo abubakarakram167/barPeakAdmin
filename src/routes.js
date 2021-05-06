@@ -11,6 +11,7 @@ const CategoryForm = React.lazy(() => import('./views/Forms/CategoryForm'));
 const LoginPage  = React.lazy(() => import('./components/LoginPage'));
 const SettingPage = React.lazy(() => import('./components/SettingPage'));
 const vibeCategoryPinColor = React.lazy(() => import('./components/VibeCategoryPinColor'));
+const updateDefaultRating = React.lazy(() => import('./components/UpdateDefaultRating'));
 
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -21,7 +22,8 @@ const routes = [
   { path:'/user/updateRadius', name: 'updateRadius', component: UpdateRadius },  
   { path:'/categoryAdd/:id', name: 'CategoryForm', component: CategoryForm },
   { path:'/settings', name: 'SettingPage', component: SettingPage },
-  { path:'/vibeCategoryPinColor', name: 'vibeCategoryPinColor', component: vibeCategoryPinColor },          
+  { path:'/vibeCategoryPinColor', name: 'vibeCategoryPinColor', component: vibeCategoryPinColor },
+  { path:'/updateDefaultRating', name: 'updateDefaultRating', component: updateDefaultRating },            
 ];
 
 export default routes;

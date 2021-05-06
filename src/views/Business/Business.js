@@ -292,8 +292,9 @@ export default (props) => {
     }catch(error){
 
     }
-   
   }
+  
+  console.log("the added business", addedBusiness)
 
   return (
     <div>
@@ -380,52 +381,52 @@ export default (props) => {
             </div>    
           </CTabPane>
           <CTabPane data-tab="recentlyAdded">
-          <CRow className = "search-bar" >
-            <CCol xs = {12}  className = "searchedgrid" style = {{ textAlign: 'center' }} >
-              <SearchField
-                placeholder="Search "
-                onChange={ (e)=> { changeSearchValue(e, 'added')} }
-                classNames="test-class"
-                onSearchClick = { ()=> {  getSearchResults('added') } }
-              />
-            </CCol>
-          </CRow>
-          { showAddedLoader ?
-            ( <Loader
-              type="Oval"
-              color="gray"
-              height={60}
-              width={60}
-              style = {{textAlign: 'center'}}
-            /> ) :
-            <div>
-              <CRow className = "search-bar" >
-                <CCol className = "business-type-container" sm = {12} >
-                  <div className = "business-type-text" >What you want to ADD ?</div>  
-                  <Radio.Group onChange={onChange} value={selectedCategory}>
-                    { categories.map((category)=>{
-                        if(category.type === "main_category"){
-                          return(
-                            <Radio value={category._id}>{ category.title }</Radio>
-                          )
-                        }
-                      }) 
-                    }
-                  </Radio.Group>
-                </CCol>
-              </CRow>
-              <Businesslist  
-                businesses = {addedBusiness} 
-                update = {true}
-                category = {selectedCategory} 
-              />
-            </div>
-            }
-            <div className = "pagination-style" >
-              < Pagination onChange = { (pageNumber)=>{ 
-                requestAddedBusiness(pageNumber, selectedCategory)
-              } } />
-            </div>    
+            <CRow className = "search-bar" >
+              <CCol xs = {12}  className = "searchedgrid" style = {{ textAlign: 'center' }} >
+                <SearchField
+                  placeholder="Search "
+                  onChange={ (e)=> { changeSearchValue(e, 'added')} }
+                  classNames="test-class"
+                  onSearchClick = { ()=> {  getSearchResults('added') } }
+                />
+              </CCol>
+            </CRow>
+            { showAddedLoader ?
+              ( <Loader
+                type="Oval"
+                color="gray"
+                height={60}
+                width={60}
+                style = {{textAlign: 'center'}}
+              /> ) :
+              <div>
+                <CRow className = "search-bar" >
+                  <CCol className = "business-type-container" sm = {12} >
+                    <div className = "business-type-text" >What you want to ADD ?</div>  
+                    <Radio.Group onChange={onChange} value={selectedCategory}>
+                      { categories.map((category)=>{
+                          if(category.type === "main_category"){
+                            return(
+                              <Radio value={category._id}>{ category.title }</Radio>
+                            )
+                          }
+                        }) 
+                      }
+                    </Radio.Group>
+                  </CCol>
+                </CRow>
+                <Businesslist  
+                  businesses = {addedBusiness} 
+                  update = {true}
+                  category = {selectedCategory} 
+                />
+              </div>
+              }
+              <div className = "pagination-style" >
+                < Pagination onChange = { (pageNumber)=>{ 
+                  requestAddedBusiness(pageNumber, selectedCategory)
+                } } />
+              </div>    
           </CTabPane>
           <CTabPane data-tab="notCategorize">
           <CRow>
