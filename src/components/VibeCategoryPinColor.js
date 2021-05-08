@@ -178,7 +178,7 @@ export default (props) => {
             </CForm>
           </CCol>
         </CRow>
-        <CRow>
+        {/* <CRow>
           <CCol
             style = {{ textAlign: 'center' }}
           >  
@@ -192,7 +192,7 @@ export default (props) => {
               </CButton>        
             </div>
           </CCol>
-        </CRow>
+        </CRow> */}
       </CContainer>    
     </div>
   );

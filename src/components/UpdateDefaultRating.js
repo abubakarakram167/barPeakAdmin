@@ -31,7 +31,7 @@ export default (props) => {
   const [message, setMessage] = useState(''); 
   const [currentGenderBreakDown, setCurrentGenderBreakDown] = useState("Equal Girls and Guys")
   const [ isRunning, setIsRunning] = useState(false)
-  const [ isCurrentDefault ,setIsCurrentDefault ] = useState(true);
+  const [ isCurrentDefault ,setIsCurrentDefault ] = useState("true");
 
   const [allDays, setAllDays] = useState([
     { name: "Sun", value: 0 , select: false} ,
@@ -118,7 +118,7 @@ export default (props) => {
         const getDefaultSettings = await axios.get('/getdefaultSettings');
         const settings = getDefaultSettings.data.settings;
         setRatingData(settings.rating)        
-        setIsCurrentDefault(settings.isCurrentDefault);
+        setIsCurrentDefault(settings.isCurrentDefault ? "true" : "false");
         setFormData({ 
           noOfUsersUntilShowDefault: settings.noOfUsersUntilShowDefault 
         });
@@ -163,11 +163,13 @@ export default (props) => {
                 <CLabel className = "labelText" > Default </CLabel>
                 <div 
                   onChange={(e) => {
+                    console.log("the clicked", e.target.value)
+                    console.log("the casad", isCurrentDefault)
                     setIsCurrentDefault(e.target.value)
                   }}
                 >
-                  <input type="radio" checked = { isCurrentDefault } value = {true} name="currentDefault"/> Yes
-                  <input style = {{ marginLeft: 20 }} type="radio" checked = { !isCurrentDefault }  value = {false} name="currentDefault"/> No
+                  <input onClick = {(e)=> { setIsCurrentDefault(e.target.value) }} type="radio" checked = { isCurrentDefault === "true" ? true : false } value = {"true"} name="currentDefault"/> Yes
+                  <input onClick = {(e)=> { setIsCurrentDefault(e.target.value) }} style = {{ marginLeft: 20 }} type="radio" checked = { isCurrentDefault === "false" ? true : false }  value = {"false"} name="currentDefault"/> No
                 </div>
               </CFormGroup>     
               <p style = {{ fontSize: 20 }} >Default Rating:</p>

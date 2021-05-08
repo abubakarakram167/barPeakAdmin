@@ -113,7 +113,6 @@ export default (props) => {
     setFormData(prevState => ({ ...prevState, category: specificCategory }));
   }
 
-  
   const onChangeRating = (event) => {
     const { name, value } = event.target;
     if(name === "ratioInput")
@@ -192,7 +191,7 @@ export default (props) => {
                 ratioInput: ${ratingData.ratioInput}
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
-                createdAt: "${moment().format("YYYY-MM-DD HH:mm:ss")}"
+                creationAt: "${moment().format("YYYY-MM-DD HH:mm:ss")}"
               },
               customData:{
                 rating: ${customData.rating},
@@ -218,7 +217,7 @@ export default (props) => {
           setShowPopup(true)
         } 
       }catch(err){
-        console.log("the error", err.response)
+        console.log("the errorsss", err.response)
         setShowPopup(true)
         setSuccess(false);
         
@@ -334,6 +333,7 @@ export default (props) => {
             setBar(true)  
         })
         let openingHours = [];
+        console.log("the", moment().day())
         if(singleBusiness && 
           singleBusiness.googleBusiness && 
           singleBusiness.googleBusiness.opening_hours && 
@@ -366,7 +366,7 @@ export default (props) => {
         // console.log("the open time", openingHours[0].open.time)
         setCurrentOpenTime(openingHours[0].open.time.toString())
         setCurrentCloseTime(openingHours[0].close.time.toString())
-        setCurrentWeekDayName( parseInt(openingHours[0].open.day))
+        setCurrentWeekDayName( moment().day())
         setOpeningHours(openingHours)
         setOpeningHoursFormat( getSpecificTimingPerWeekFormat(singleBusiness.googleBusiness.opening_hours))
         setRatingData(singleBusiness.rating);
@@ -386,7 +386,7 @@ export default (props) => {
   const getDayNumber = (number) => {
     return parseInt(number)
   }
-
+  console.log("the weekday name", currentWeekDayName)
 
   const  getSpecificTimingPerWeekFormat = (openingHours)=> {
     let schedulePerWeek = [];
@@ -396,7 +396,9 @@ export default (props) => {
         let day = {};
         day.openName = weekDays[getDayNumber(period.open.day)]
         day.open = period.open.time
-        day.closeName = weekDays[ 2]
+        day.openDayNumber = period.open.day
+        day.closeDayNumber = period.close.day
+        day.closeName = weekDays[getDayNumber(period.close.day)]
         day.close = period.close.time
         schedulePerWeek.push(day)
       })
@@ -423,7 +425,6 @@ export default (props) => {
     let changeOpeningHours = ''
     let displayChanged = {};
     if(event.target.name === "weekDayName"){
-      setCurrentWeekDayName(parseInt(event.target.value))
       openingHours.map(day => {      
         if(parseInt(day.open.day) === parseInt (event.target.value)){
           setCurrentOpenTime(day.open.time)
@@ -433,15 +434,15 @@ export default (props) => {
     }
     else if(event.target.name === "weekDayOpenTime"){
       openingHours.map(day => {
-        if(parseInt(day.open.day) === currentWeekDayName){
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName)){
           setCurrentOpenTime(event.target.value)
         }
       })
       changeOpeningHours = openingHours.map(day => {
-        if(parseInt(day.open.day) === currentWeekDayName){
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName)){
           return {
             open: {
-              day: currentWeekDayName.toString(),
+              day: day.open.day,
               time: event.target.value
             },
             close: {
@@ -453,6 +454,8 @@ export default (props) => {
         else 
           return day
       })
+
+      console.log("the changed format", changeOpeningHours)
       setOpeningHours(changeOpeningHours)
       displayChanged.periods = changeOpeningHours
       setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
@@ -460,12 +463,12 @@ export default (props) => {
 
     else if(event.target.name === "weekDayCloseTime"){
       openingHours.map(day => {
-        if(parseInt(day.open.day) === currentWeekDayName){
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
           setCurrentCloseTime(event.target.value)
         }
       })
       changeOpeningHours = openingHours.map(day => {
-        if(parseInt(day.open.day) === currentWeekDayName){
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
           return {
             open: {
               day: day.open.day,
@@ -480,6 +483,7 @@ export default (props) => {
         else 
           return day
       })
+      console.log("the changed format in close", changeOpeningHours)
       setOpeningHours(changeOpeningHours)
     }
   })
@@ -687,80 +691,74 @@ export default (props) => {
                 </CLabel>
                 { openingHoursFormat && openingHoursFormat.map((timing)=>{
                   console.log(`the timing open is ${timing.open } and close: ${timing.close}`)   
-                    var openTime = timing.open.substr(0,2)+":"+timing.open.substr(2);
-                    var closeTime = timing.close.substr(0,2)+":"+timing.close.substr(2);
                     
                     return (
-                      <div> 
-                        On { timing.openName.charAt(0).toUpperCase() + timing.openName.slice(1) + " " } 
-                        <select 
-                          onChange = {onChangeTime} 
-                          name = "weekDayOpenTime"
-                          value = { timing.open }
-                          style = {{ 
-                            marginLeft: 20, 
-                            marginRight: 20,
-                            width: '30%', 
-                            padding: 5, 
-                            border: '1px solid black', 
-                            borderRadius: 10 
-                          }} 
-                        >
-                          { hoursPerDay.map((timeDay, index) => {
-                            var openTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
-                            return (<option selected value= { timeDay }> { moment(openTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
-                          })  
-                          }
-                        </select>
-                        <span>  -- </span>     
-                        <select 
-                          onChange = {onChangeTime} 
-                          name = "weekDayCloseTime"
-                          value = { timing.close }
-                          style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
-                        >
-                          { hoursPerDay.map((timeDay, index) => {
-                            var closeTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
-                            return (<option selected value= { timeDay }> { moment(closeTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
-                          })  
-                          }
-                        </select>
+                      <div className = "container" >
+                        <div
+                          className = "row"
+                          style = {{ marginTop: 20, width: "100%" }} 
+                          onClick = {()=> { 
+                            setCurrentWeekDayName(timing.openDayNumber)
+                            console.log("its calling...", timing) 
+                          }}
+                        > 
+                          <div 
+                            className = "col-md-2" 
+                            style = {{ fontSize: 12, textAlign: 'center' }}  
+                          >
+                            On { timing.openName.charAt(0).toUpperCase() + timing.openName.slice(1) + " " } 
+                          </div>
+                          <div className = "col-md-4" >
+                            <select 
+                              onChange = {onChangeTime} 
+                              name = "weekDayOpenTime"
+                              style = {{ 
+                                marginLeft: 20, 
+                                marginRight: 20,
+                                width: '80%', 
+                                padding: 5, 
+                                border: '1px solid black', 
+                                borderRadius: 10 
+                              }} 
+                            >
+                              { hoursPerDay.map((timeDay, index) => {
+                                console.log("hours per day", timeDay)
+                                var openTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
+                                return (<option selected= {timing.open === timeDay}  value= { timeDay }> { moment(openTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
+                              })  
+                              }
+                            </select>  
+                          </div>
+                          <div
+                            style = {{textAlign: 'center'  }}
+                            className = "col-md-2"
+                          >
+                            <span>--</span> 
+                          </div>
+                          <div
+                            className = "col-md-4"
+                          >
+                            <select 
+                              onChange = {onChangeTime} 
+                              name = "weekDayCloseTime"
+                              dayCloseNumber = {timing.closeDayNumber}
+                              style = {{ marginLeft: 20, width: '80%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                            >
+                              { hoursPerDay.map((timeDay, index) => {
+                                  var closeTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
+                                  return (<option selected= {timing.close === timeDay} value= { timeDay }> { moment(closeTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
+                                })  
+                              }
+                            </select>
+                          </div>
+                          
+                        </div>
                       </div>
                     );
                   })
                 }  
                 <CFormText className="help-block" style = {{ fontWeight: 600 }} >Please Update Establishment Timings.</CFormText>
               </CFormGroup>
-              {/* <CFormGroup>
-                <CLabel >Open</CLabel>
-                <select 
-                  onChange = {onChangeTime} 
-                  name = "weekDayOpenTime"
-                  value = {currentOpenTime}
-                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
-                >
-                  { hoursPerDay.map((timeDay, index) => {
-                    return (<option selected value= { timeDay }> { timeDay  }</option>)
-                  })  
-                  }
-                </select>
-                <CFormText className="help-block">Please Select Opening Time</CFormText>
-              </CFormGroup>
-              <CFormGroup>
-                <CLabel >Close</CLabel>
-                <select 
-                  onChange = {onChangeTime} 
-                  name = "weekDayCloseTime"
-                  value = {currentCloseTime}
-                  style = {{ marginLeft: 20, width: '30%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
-                >
-                  { hoursPerDay.map((timeDay, index) => {
-                    return (<option selected value= { timeDay }> { timeDay  }</option>)
-                  })  
-                  }
-                </select>
-                <CFormText className="help-block">Please Select Closing Time</CFormText>
-              </CFormGroup> */}
               <p style = {{ fontSize: 20 }} >Rating:</p>
               { ratingData &&
                 <CFormGroup>
