@@ -175,7 +175,8 @@ export default (props) => {
     }
     
     const allPhotos = getPhotos().slice(0,-1);
-    
+    console.log("the opening Hours", openingHours);
+
     if(validate()){
       const body = {
         query:` 
@@ -340,6 +341,7 @@ export default (props) => {
           singleBusiness.googleBusiness.opening_hours.periods.length 
         ){
           openingHours = singleBusiness.googleBusiness.opening_hours.periods;
+          console.log("after fetching opening hours", openingHours)
         }else if(singleBusiness) {
           let increment = false ;
           openingHours = weekDays.map((dayName, index)=> {
@@ -446,7 +448,7 @@ export default (props) => {
               time: event.target.value
             },
             close: {
-              day: day.close.day,
+              day: day.open.day,
               time: day.close.time
             }
           }
@@ -475,7 +477,7 @@ export default (props) => {
               time: day.open.time
             },
             close: {
-              day: day.close.day,
+              day: day.open.day,
               time: event.target.value
             }
           }
