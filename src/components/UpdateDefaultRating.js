@@ -93,7 +93,8 @@ export default (props) => {
     const body = {
       rating: ratingData,
       noOfUsersUntilShowDefault: formData.noOfUsersUntilShowDefault,
-      isCurrentDefault
+      isCurrentDefault,
+      ratingChangeTime: moment().format('YYYY-MM-DD HH:mm')
     }
 
     try{

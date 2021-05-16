@@ -226,7 +226,6 @@ export default (props) => {
   }
   
   const getGenderBreakDownValue = (value) => {
-    console.log("the value", value)
     let genderBreakDownValue ;
     if(parseInt(value) === 1)
       genderBreakDownValue = "Equal Girls and Guys";
@@ -317,6 +316,7 @@ export default (props) => {
           'Authorization': `Bearer ${token}`
         }});
         const singleBusiness = getSingleBusinessData.data.data.getSingleBusiness;
+        console.log("the single Business", singleBusiness);
         if(singleBusiness.customBusiness){
           setCustomField(true)
           const { customData } = singleBusiness;
@@ -492,9 +492,7 @@ export default (props) => {
   if(formData.newPhotos && formData.newPhotos.length>0)
     photos = null
   let dataTo = openingHours.toString()
-  // console.log("the opening Hours......", JSON.stringify(openingHours))
-  // console.log("after object split", dataTo.split(''))
-  console.log("the opening hours", openingHoursFormat)
+
   return(
     <div>
       <CContainer className = "form-container-width" >
@@ -690,8 +688,7 @@ export default (props) => {
                   Establishment Hours
                 </CLabel>
                 { openingHoursFormat && openingHoursFormat.map((timing)=>{
-                  console.log(`the timing open is ${timing.open } and close: ${timing.close}`)   
-                    
+                     
                     return (
                       <div className = "container" >
                         <div
@@ -722,7 +719,6 @@ export default (props) => {
                               }} 
                             >
                               { hoursPerDay.map((timeDay, index) => {
-                                console.log("hours per day", timeDay)
                                 var openTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
                                 return (<option selected= {timing.open === timeDay}  value= { timeDay }> { moment(openTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
                               })  
