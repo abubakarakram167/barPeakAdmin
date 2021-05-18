@@ -7,7 +7,6 @@ import {
   CInput,
   CFormText,
   CForm,
-  CTextarea,
   CButton
  } from '@coreui/react'
 import axios from '../../api';
@@ -21,8 +20,29 @@ import { Row, Col } from 'antd';
 import 'intl-tel-input/build/css/intlTelInput.css';
 import Widget from '../../components/Widget';
 import './formContainer.css';
+import moment from 'moment';
+
+const weekDays = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+const hoursPerDay = [
+  "0000", "0030","0100","0130","0200","0230",
+  "0300","0330","0400","0430","0500","0530",
+  "0600","0630","0700","0730","0800","0830",
+  "0900","0930","1000","1030","1100","1130",
+  "1200","1230","1300","1330","1400","1430",
+  "1500","1530","1600","1630","1700","1730",
+  "1800","1830","1900","1930","2000","2030",
+  "2100","2130","2200","2230","2300","2330"
+]
+
 export default (props) => {
-  
   const [allCateogories, setCategories]=useState([]);
   const [isBar, setBar]=useState(false);
   const [formData, setFormData] = useState({category: [], uploadedPhotos: [], ageInterval: 'young', ratioType: 'boy' });
@@ -34,9 +54,14 @@ export default (props) => {
     difficultyGettingDrink: 2 
   });
   const [currentGenderBreakDown, setCurrentGenderBreakDown] = useState("Equal Girls and Guys");
+  const [ currentWeekDayName, setCurrentWeekDayName ] = useState('');
+  const [openingHoursFormat, setOpeningHoursFormat] = useState([]);
   const [googleDetailData, setGoogleDetailData] = useState({});
   const [showPopup, setShowPopup] = useState(false);
-  const [success, setSuccess] = useState(true); 
+  const [success, setSuccess] = useState(true);
+  const [openingHours, setOpeningHours] = useState([]); 
+  const [ currentOpenTime, setCurrentOpenTime ] = useState('');
+  const [ currentCloseTime, setCurrentCloseTime ] = useState('');
   const [error, setError] = useState({})
   
   const selectedcategoryIds = []
@@ -45,6 +70,157 @@ export default (props) => {
     const { name, value } = event.target; 
     setFormData(prevState => ({ ...prevState, [name]: value }));
   }
+
+  const getDayNumber = (number) => {
+    return parseInt(number)
+  }
+
+  const isEstablishmentOpen = (timings) => {
+    const openingTime = timings.open.toString()
+    const closingTime = timings.close.toString()
+    let completeOpeningTime;
+    let completeClosingTime;
+    if(openingTime.length === 3){
+      completeOpeningTime = openingTime.split('')
+      completeOpeningTime.unshift(0)
+      completeOpeningTime.splice( 2, 0, ':' )
+      completeClosingTime = closingTime.split('')
+      completeClosingTime.unshift(0)
+      completeClosingTime.splice( 2, 0, ':' )
+    }
+    else{
+      completeOpeningTime = openingTime.split('')
+      completeOpeningTime.splice( 2, 0, ':' )
+      completeClosingTime = closingTime.split('')
+      completeClosingTime.splice( 2, 0, ':' )
+    }
+
+    const restaurantOpenTime = moment().format("YYYY-MM-DD") + " " + completeOpeningTime.toString().split(',').join("")
+    const restaurantCloseTime = moment().format("YYYY-MM-DD") + " " + completeClosingTime.toString().split(',').join("")
+    const todaysTime = moment().format("YYYY-MM-DD HH:mm");
+
+    if(todaysTime > restaurantOpenTime && todaysTime < restaurantCloseTime ) return true
+    return false
+    
+  }
+
+  const  getSpecificTimingPerWeekFormat = (openingHours)=> {
+    let schedulePerWeek = [];
+    const daysPerWeek = [0,1,2,3,4,5,6];
+    let allOpenDays = openingHours.periods.map(period => parseInt(period.open.day))
+    if(openingHours&& openingHours.periods.length){  
+      daysPerWeek.map( weekNumber => { 
+        let again = true;
+        openingHours.periods.map((period, index)=> {
+          if( again && allOpenDays.includes(weekNumber)){
+            if( parseInt(period.open.day) === weekNumber ){
+              let day = {};
+              day.openName = weekDays[getDayNumber(period.open.day)]
+              day.open = period.open.time
+              day.openDayNumber = period.open.day
+              day.closeDayNumber = period.close.day
+              day.closeName = weekDays[getDayNumber(period.close.day)]
+              day.close = period.close.time   
+              schedulePerWeek.push(day)
+              again = false
+            }
+          }
+          else if(again){
+            let day = {};
+            day.openName = weekDays[getDayNumber(weekNumber)]
+            day.open = "1100"
+            day.openDayNumber = weekNumber.toString()
+            day.closeDayNumber = weekNumber.toString()
+            day.closeName = weekDays[getDayNumber(weekNumber)]
+            day.close = "2300" 
+            schedulePerWeek.push(day)
+            again = false
+          }
+           
+          
+        })
+
+      })
+    }
+    else {
+      let dayObject = {};
+      daysPerWeek.map( day => {
+        dayObject.openName = weekDays[day];
+        dayObject.closeName = weekDays[day];
+        day.openDayNumber = day
+        day.closeDayNumber = day
+        dayObject.open =  "11:00"
+        dayObject.close = "23:00"
+        schedulePerWeek.push(dayObject)
+      })
+    }
+    return schedulePerWeek;
+  }
+
+
+  const onChangeTime = (event => {
+    let changeOpeningHours = ''
+    let displayChanged = {};
+    if(event.target.name === "weekDayName"){
+      openingHours.map(day => {      
+        if(parseInt(day.open.day) === parseInt (event.target.value)){
+          setCurrentOpenTime(day.open.time)
+          setCurrentCloseTime(day.close.time)
+        }
+      })
+    }
+    else if(event.target.name === "weekDayOpenTime"){
+      openingHours.map(day => {
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName)){
+          setCurrentOpenTime(event.target.value)
+        }
+      })
+      changeOpeningHours = openingHours.map(day => {
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName)){
+          return {
+            open: {
+              day: day.open.day,
+              time: event.target.value
+            },
+            close: {
+              day: day.open.day,
+              time: day.close.time
+            }
+          }
+        }
+        else 
+          return day
+      })
+      setOpeningHours(changeOpeningHours)
+      displayChanged.periods = changeOpeningHours
+      setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
+    }
+
+    else if(event.target.name === "weekDayCloseTime"){
+      openingHours.map(day => {
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
+          setCurrentCloseTime(event.target.value)
+        }
+      })
+      changeOpeningHours = openingHours.map(day => {
+        if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
+          return {
+            open: {
+              day: day.open.day,
+              time: day.open.time
+            },
+            close: {
+              day: day.open.day,
+              time: event.target.value
+            }
+          }
+        }
+        else 
+          return day
+      })
+      setOpeningHours(changeOpeningHours)
+    }
+  })
 
   const onChangeCategory = (event) => {
     const { value } = event.target;
@@ -149,14 +325,17 @@ export default (props) => {
                 ratioInput: ${ratingData.ratioInput}
                 difficultyGettingIn: ${ratingData.difficultyGettingIn}
                 difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
+                creationAt: "${moment().format("YYYY-MM-DD HH:mm:ss")}"
               },
               customData:{
                 rating: ${formData.rating},
                 address: "${formData.address}"
                 latitude: ${formData.latitude},
                 longitude: ${formData.longitude},
-                phoneNo: "${formData.phoneNo}"
-              }
+                phoneNo: "${formData.phoneNo}",
+              },
+              openingHours: "${JSON.stringify(openingHours).replace(/"/g, '\\"') }",
+              customBusiness: true
           })
           { _id
             name    
@@ -173,12 +352,9 @@ export default (props) => {
         } 
         console.log("the response after getting business", res); 
       }catch(err){
-        // if(err.response.data){
-        //   console.log("the error", err.data.errors.length)
-        // }
+        console.log("the error.response", err.response)
         setShowPopup(true)
         setSuccess(false);
-        console.log("the error below", err.response)
         
       }
     }
@@ -210,6 +386,24 @@ export default (props) => {
       }catch(err){
         console.log("the error", err.response);
       }
+      let openingHours = [];
+      let openingHoursFormatted = {};
+      const daysPerWeek = [0,1,2,3,4,5,6];
+      openingHours = daysPerWeek.map( weekNumber => {     
+        let day = {};
+        let open = {};
+        let close = {};
+        open.day = weekNumber.toString()
+        close.day = weekNumber.toString()
+        open.time = "1100"
+        close.time = "2300"
+        day.open = open;
+        day.close = close; 
+        return day;
+      })
+      setOpeningHours(openingHours)
+      openingHoursFormatted.periods = openingHours
+      setOpeningHoursFormat( getSpecificTimingPerWeekFormat(openingHoursFormatted))
     }
     fetchData();
   }, []);
@@ -300,6 +494,93 @@ export default (props) => {
                 />
                 {error.latitude &&  <Alert message="Longitude is required" type="error" />  }
                 <CFormText className="help-block">Please enter Correct Longitude </CFormText>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel style = {{ fontWeight:800 }} >
+                  Establishment Hours
+                </CLabel>
+                { openingHoursFormat && openingHoursFormat.map((timing)=>{
+                     
+                    return (
+                      <div className = "container" >
+                        <div
+                          className = "row"
+                          style = {{ marginTop: 20, width: "100%" }} 
+                          onClick = {()=> { 
+                            setCurrentWeekDayName(timing.openDayNumber)
+                            console.log("its calling...", timing) 
+                          }}
+                        > 
+                          <div 
+                            className = "col-md-2" 
+                            style = {{ fontSize: 12, textAlign: 'center' }}  
+                          >
+                            On { timing.openName.charAt(0).toUpperCase() + timing.openName.slice(1) + " " } 
+                          </div>
+                          <div className = "col-md-3" >
+                            <select 
+                              onChange = {onChangeTime} 
+                              name = "weekDayOpenTime"
+                              style = {{ 
+                                marginLeft: 20, 
+                                marginRight: 20,
+                                width: '100%', 
+                                padding: 5, 
+                                border: '1px solid black', 
+                                borderRadius: 10 
+                              }} 
+                            >
+                              { hoursPerDay.map((timeDay, index) => {
+                                var openTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
+                                return (<option selected= {timing.open === timeDay}  value= { timeDay }> { moment(openTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
+                              })  
+                              }
+                            </select>  
+                          </div>
+                          <div
+                            style = {{textAlign: 'center'  }}
+                            className = "col-md-2"
+                          >
+                            <span>--</span> 
+                          </div>
+                          <div
+                            className = "col-md-3"
+                          >
+                            <select 
+                              onChange = {onChangeTime} 
+                              name = "weekDayCloseTime"
+                              dayCloseNumber = {timing.closeDayNumber}
+                              style = {{ marginLeft: 20, width: '100%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                            >
+                              { hoursPerDay.map((timeDay, index) => {
+                                  var closeTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
+                                  return (<option selected= {timing.close === timeDay} value= { timeDay }> { moment(closeTime.toString(), 'HH:mm').format('hh:mm a') }</option>)
+                                })  
+                              }
+                            </select>
+                          </div>
+                          <div
+                            className = "col-md-2"
+                          >
+                            <p 
+                              style = {{
+                                textAlign: "center",
+                                padding: 5,
+                                backgroundColor: isEstablishmentOpen(timing) ?  '#2f8403' : 'red' ,
+                                borderRadius: 20,
+                                color: 'white'
+                              }}
+                            >
+                              { isEstablishmentOpen(timing) ? "Open" : "Closed"  }
+                            </p>
+                          </div>
+                          
+                        </div>
+                      </div>
+                    );
+                  })
+                }  
+                <CFormText className="help-block" style = {{ fontWeight: 600 }} >Please Update Establishment Timings.</CFormText>
               </CFormGroup>
               <CFormGroup>
                 <CLabel >Rating</CLabel>

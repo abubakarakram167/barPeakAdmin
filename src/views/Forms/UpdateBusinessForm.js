@@ -33,30 +33,14 @@ const weekDays = [
   "saturday",
 ];
 const hoursPerDay = [
-  "1000",
-  "1100",
-  "1200",
-  "1300",
-  "1400",
-  "1500",
-  "1600",
-  "1700",
-  "1800",
-  "1900",
-  "2000",
-  "2100",
-  "2200",
-  "2300",
-  "0000",
-  "0100",
-  "0200",
-  "0300",
-  "0400",
-  "0500",
-  "0600",
-  "0700",
-  "0800",
-  "0900",
+  "0000", "0030","0100","0130","0200","0230",
+  "0300","0330","0400","0430","0500","0530",
+  "0600","0630","0700","0730","0800","0830",
+  "0900","0930","1000","1030","1100","1130",
+  "1200","1230","1300","1330","1400","1430",
+  "1500","1530","1600","1630","1700","1730",
+  "1800","1830","1900","1930","2000","2030",
+  "2100","2130","2200","2230","2300","2330"
 ]
 
 export default (props) => {
@@ -159,6 +143,10 @@ export default (props) => {
   const submitForm = async () => {
     const { token } = await getUserData();
     let customData = {};
+    let customBusiness = false;
+    if(!formData.googleBusiness)
+      customBusiness = true
+   
     if(formData.customBusiness){
       customData.rating = formData.customRating
       customData.address = formData.address
@@ -173,36 +161,36 @@ export default (props) => {
       customData.longitude = null
       customData.phoneNo = null
     }
-    
+
     const allPhotos = getPhotos().slice(0,-1);
-    console.log("the opening Hours", openingHours);
 
     if(validate()){
       const body = {
         query:` 
         mutation{
           updateBusiness(businessInput: {
-              category: "${formData.category.toString()}",
-              name: "${formData.name}",
-              id: "${props.id}",
-              ageInterval: "${formData.ageInterval}"
-              rating:{
-                fun: ${ratingData.fun}
-                crowd: ${ ratingData.crowd }
-                ratioInput: ${ratingData.ratioInput}
-                difficultyGettingIn: ${ratingData.difficultyGettingIn}
-                difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
-                creationAt: "${moment().format("YYYY-MM-DD HH:mm:ss")}"
-              },
-              customData:{
-                rating: ${customData.rating},
-                address: "${customData.address}"
-                latitude: ${customData.latitude},
-                longitude: ${customData.longitude},
-                phoneNo: "${customData.phoneNo}"
-              },
-              openingHours: "${JSON.stringify(openingHours).replace(/"/g, '\\"') }" 
-              photos: "${allPhotos}" 
+            category: "${formData.category.toString()}",
+            name: "${formData.name}",
+            id: "${props.id}",
+            ageInterval: "${formData.ageInterval}",
+            customBusiness: ${customBusiness},
+            rating:{
+              fun: ${ratingData.fun}
+              crowd: ${ ratingData.crowd }
+              ratioInput: ${ratingData.ratioInput}
+              difficultyGettingIn: ${ratingData.difficultyGettingIn}
+              difficultyGettingDrink : ${ratingData.difficultyGettingDrink}
+              creationAt: "${moment().format("YYYY-MM-DD HH:mm:ss")}"
+            },
+            customData:{
+              rating: ${customData.rating},
+              address: "${customData.address}"
+              latitude: ${customData.latitude},
+              longitude: ${customData.longitude},
+              phoneNo: "${customData.phoneNo}"
+            },
+            openingHours: "${JSON.stringify(openingHours).replace(/"/g, '\\"') }" 
+            photos: "${allPhotos}" 
           })
           {
             name
@@ -225,7 +213,7 @@ export default (props) => {
       }
     }
   }
-  
+
   const getGenderBreakDownValue = (value) => {
     let genderBreakDownValue ;
     if(parseInt(value) === 1)
@@ -279,6 +267,18 @@ export default (props) => {
               rating
               latitude
               longitude
+              opening_hours{
+                periods{
+                  close{
+                    day,
+                    time
+                  },
+                  open{
+                    day,
+                    time
+                  }
+                }
+              }
             }
             customBusiness,
             uploadedPhotos{
@@ -326,6 +326,7 @@ export default (props) => {
           singleBusiness.longitude = customData.longitude
           singleBusiness.address =  customData.address
           singleBusiness.phoneNo = customData.phoneNo
+          
         }
         const allSpecificCategories = res.data.data.getCategories
         singleBusiness.category.map((category)=>{
@@ -333,44 +334,67 @@ export default (props) => {
           if(category.title === 'Bar')
             setBar(true)  
         })
-        let openingHours = [];
-        console.log("the", moment().day())
+        let tobeChangeHours = {};
+      
         if(singleBusiness && 
           singleBusiness.googleBusiness && 
           singleBusiness.googleBusiness.opening_hours && 
           singleBusiness.googleBusiness.opening_hours.periods.length 
         ){
-          openingHours = singleBusiness.googleBusiness.opening_hours.periods;
-          console.log("after fetching opening hours", openingHours)
-        }else if(singleBusiness) {
-          let increment = false ;
-          openingHours = weekDays.map((dayName, index)=> {
-            if(index === 6){
-              index = -1
-              increment = true
-            }
-            else {
-              increment = false
-            }
-              
-            return {
-              close: {
-                day: (index + 1) .toString(),
-                time: "0200"
-              },
-              open: {
-                day:  increment ? "6" : index.toString(),
-                time: "1100"
+          tobeChangeHours.periods = singleBusiness.googleBusiness.opening_hours.periods;
+          let addMissingDays = [];
+          const daysPerWeek = [0,1,2,3,4,5,6];
+          let allOpenDays = tobeChangeHours.periods.map(period => parseInt(period.open.day))
+         
+          if(tobeChangeHours&& tobeChangeHours.length){  
+            tobeChangeHours.periods = daysPerWeek.map( weekNumber => { 
+              let again = true;
+               for (let period of tobeChangeHours){
+                if( again && allOpenDays.includes(weekNumber)){
+                  if( parseInt(period.open.day) === weekNumber )
+                   return period
+                }
+                else if(again){
+                  let day = {};
+                  let open = {};
+                  let close = {};
+                  open.day = weekNumber.toString()
+                  close.day = weekNumber.toString()
+                  open.time = "1100"
+                  close.time = "2300"
+                  day.open = open;
+                  day.close = close; 
+                  return day;
+                }
               }
-            }
-          })
+            })
+          }
+        }else if(singleBusiness) {
+          if(singleBusiness.customData && singleBusiness.customData.opening_hours){
+            tobeChangeHours.periods = singleBusiness.customData.opening_hours.periods
+          }
+          else{
+            let increment = false ;
+            tobeChangeHours.periods = weekDays.map((dayName, index)=> {      
+              return {
+                close: {
+                  day: index.toString(),
+                  time: "2300"
+                },
+                open: {
+                  day: index.toString(),
+                  time: "1100"
+                }
+              }
+            })
+          }
         }
-        // console.log("the open time", openingHours[0].open.time)
-        setCurrentOpenTime(openingHours[0].open.time.toString())
-        setCurrentCloseTime(openingHours[0].close.time.toString())
+        
+        setCurrentOpenTime(tobeChangeHours.periods[0].open.time.toString())
+        setCurrentCloseTime(tobeChangeHours.periods[0].close.time.toString())
         setCurrentWeekDayName( moment().day())
-        setOpeningHours(openingHours)
-        setOpeningHoursFormat( getSpecificTimingPerWeekFormat(singleBusiness.googleBusiness.opening_hours))
+        setOpeningHours(tobeChangeHours.periods)
+        setOpeningHoursFormat( getSpecificTimingPerWeekFormat(tobeChangeHours))
         setRatingData(singleBusiness.rating);
         setSpecificBusinessCategory(singleBusiness.category)
         singleBusiness.category = singleBusiness.category.map(category => category._id)
@@ -388,21 +412,43 @@ export default (props) => {
   const getDayNumber = (number) => {
     return parseInt(number)
   }
-  console.log("the weekday name", currentWeekDayName)
 
   const  getSpecificTimingPerWeekFormat = (openingHours)=> {
     let schedulePerWeek = [];
     const daysPerWeek = [0,1,2,3,4,5,6];
+    let allOpenDays = openingHours.periods.map(period => parseInt(period.open.day))
     if(openingHours&& openingHours.periods.length){  
-      openingHours.periods.map(period=> {
-        let day = {};
-        day.openName = weekDays[getDayNumber(period.open.day)]
-        day.open = period.open.time
-        day.openDayNumber = period.open.day
-        day.closeDayNumber = period.close.day
-        day.closeName = weekDays[getDayNumber(period.close.day)]
-        day.close = period.close.time
-        schedulePerWeek.push(day)
+      daysPerWeek.map( weekNumber => { 
+        let again = true;
+        openingHours.periods.map((period, index)=> {
+          if( again && allOpenDays.includes(weekNumber)){
+            if( parseInt(period.open.day) === weekNumber ){
+              let day = {};
+              day.openName = weekDays[getDayNumber(period.open.day)]
+              day.open = period.open.time
+              day.openDayNumber = period.open.day
+              day.closeDayNumber = period.close.day
+              day.closeName = weekDays[getDayNumber(period.close.day)]
+              day.close = period.close.time   
+              schedulePerWeek.push(day)
+              again = false
+            }
+          }
+          else if(again){
+            let day = {};
+            day.openName = weekDays[getDayNumber(weekNumber)]
+            day.open = "1100"
+            day.openDayNumber = weekNumber.toString()
+            day.closeDayNumber = weekNumber.toString()
+            day.closeName = weekDays[getDayNumber(weekNumber)]
+            day.close = "2300" 
+            schedulePerWeek.push(day)
+            again = false
+          }
+           
+          
+        })
+
       })
     }
     else {
@@ -410,8 +456,10 @@ export default (props) => {
       daysPerWeek.map( day => {
         dayObject.openName = weekDays[day];
         dayObject.closeName = weekDays[day];
+        day.openDayNumber = day
+        day.closeDayNumber = day
         dayObject.open =  "11:00"
-        dayObject.close = "22:00"
+        dayObject.close = "23:00"
         schedulePerWeek.push(dayObject)
       })
     }
@@ -456,8 +504,6 @@ export default (props) => {
         else 
           return day
       })
-
-      console.log("the changed format", changeOpeningHours)
       setOpeningHours(changeOpeningHours)
       displayChanged.periods = changeOpeningHours
       setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
@@ -485,10 +531,38 @@ export default (props) => {
         else 
           return day
       })
-      console.log("the changed format in close", changeOpeningHours)
       setOpeningHours(changeOpeningHours)
     }
   })
+
+  const isEstablishmentOpen = (timings) => {
+    const openingTime = timings.open.toString()
+    const closingTime = timings.close.toString()
+    let completeOpeningTime;
+    let completeClosingTime;
+    if(openingTime.length === 3){
+      completeOpeningTime = openingTime.split('')
+      completeOpeningTime.unshift(0)
+      completeOpeningTime.splice( 2, 0, ':' )
+      completeClosingTime = closingTime.split('')
+      completeClosingTime.unshift(0)
+      completeClosingTime.splice( 2, 0, ':' )
+    }
+    else{
+      completeOpeningTime = openingTime.split('')
+      completeOpeningTime.splice( 2, 0, ':' )
+      completeClosingTime = closingTime.split('')
+      completeClosingTime.splice( 2, 0, ':' )
+    }
+
+    const restaurantOpenTime = moment().format("YYYY-MM-DD") + " " + completeOpeningTime.toString().split(',').join("")
+    const restaurantCloseTime = moment().format("YYYY-MM-DD") + " " + completeClosingTime.toString().split(',').join("")
+    const todaysTime = moment().format("YYYY-MM-DD HH:mm");
+
+    if(todaysTime > restaurantOpenTime && todaysTime < restaurantCloseTime ) return true
+    return false
+    
+  }
 
   let photos = formData.uploadedPhotos && formData.uploadedPhotos.length>0 && formData.uploadedPhotos[0].secure_url ? formData.uploadedPhotos: null
   if(formData.newPhotos && formData.newPhotos.length>0)
@@ -707,14 +781,14 @@ export default (props) => {
                           >
                             On { timing.openName.charAt(0).toUpperCase() + timing.openName.slice(1) + " " } 
                           </div>
-                          <div className = "col-md-4" >
+                          <div className = "col-md-3" >
                             <select 
                               onChange = {onChangeTime} 
                               name = "weekDayOpenTime"
                               style = {{ 
                                 marginLeft: 20, 
                                 marginRight: 20,
-                                width: '80%', 
+                                width: '100%', 
                                 padding: 5, 
                                 border: '1px solid black', 
                                 borderRadius: 10 
@@ -734,13 +808,13 @@ export default (props) => {
                             <span>--</span> 
                           </div>
                           <div
-                            className = "col-md-4"
+                            className = "col-md-3"
                           >
                             <select 
                               onChange = {onChangeTime} 
                               name = "weekDayCloseTime"
                               dayCloseNumber = {timing.closeDayNumber}
-                              style = {{ marginLeft: 20, width: '80%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
+                              style = {{ marginLeft: 20, width: '100%', padding: 5, border: '1px solid black', borderRadius: 10 }} 
                             >
                               { hoursPerDay.map((timeDay, index) => {
                                   var closeTime = timeDay.substr(0,2)+":"+timeDay.substr(2)
@@ -748,6 +822,21 @@ export default (props) => {
                                 })  
                               }
                             </select>
+                          </div>
+                          <div
+                            className = "col-md-2"
+                          >
+                            <p 
+                              style = {{
+                                textAlign: "center",
+                                padding: 5,
+                                backgroundColor: isEstablishmentOpen(timing) ?  '#2f8403' : 'red' ,
+                                borderRadius: 20,
+                                color: 'white'
+                              }}
+                            >
+                              { isEstablishmentOpen(timing) ? "Open" : "Closed"  }
+                            </p>
                           </div>
                           
                         </div>
