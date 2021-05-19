@@ -119,6 +119,7 @@ export default (props) => {
               day.open = period.open.time
               day.openDayNumber = period.open.day
               day.closeDayNumber = period.close.day
+              day.openFullDay = period.openFullDay
               day.closeName = weekDays[getDayNumber(period.close.day)]
               day.close = period.close.time   
               schedulePerWeek.push(day)
@@ -131,6 +132,7 @@ export default (props) => {
             day.open = "1100"
             day.openDayNumber = weekNumber.toString()
             day.closeDayNumber = weekNumber.toString()
+            day.openFullDay = period.openFullDay
             day.closeName = weekDays[getDayNumber(weekNumber)]
             day.close = "2300" 
             schedulePerWeek.push(day)
@@ -149,6 +151,7 @@ export default (props) => {
         dayObject.closeName = weekDays[day];
         day.openDayNumber = day
         day.closeDayNumber = day
+        day.openFullDay = true
         dayObject.open =  "11:00"
         dayObject.close = "23:00"
         schedulePerWeek.push(dayObject)
@@ -389,6 +392,7 @@ export default (props) => {
       let openingHours = [];
       let openingHoursFormatted = {};
       const daysPerWeek = [0,1,2,3,4,5,6];
+      
       openingHours = daysPerWeek.map( weekNumber => {     
         let day = {};
         let open = {};
@@ -398,6 +402,7 @@ export default (props) => {
         open.time = "1100"
         close.time = "2300"
         day.open = open;
+        day.openFullDay = true
         day.close = close; 
         return day;
       })
@@ -500,7 +505,7 @@ export default (props) => {
                   Establishment Hours
                 </CLabel>
                 { openingHoursFormat && openingHoursFormat.map((timing)=>{
-                     
+                    //  console.log("the timing..", timing)
                     return (
                       <div className = "container" >
                         <div
@@ -562,6 +567,37 @@ export default (props) => {
                           <div
                             className = "col-md-2"
                           >
+                           <div
+                            style = {{
+                              cursor: 'pointer',
+                              fontSize: 14,
+                              fontWeight: '700'
+                            }}
+                            onClick  = {(e)=> {
+                              let changeOpeningHours
+                              changeOpeningHours = openingHours.map(day => {      
+                                if(parseInt(day.open.day) === parseInt(timing.openDayNumber) ){
+                                  return {
+                                    ...day,
+                                    openFullDay: !day.openFullDay
+                                  }
+                                }
+                                else 
+                                  return day
+                              })
+                              console.log("the changeOpeningHours", changeOpeningHours)
+                              setOpeningHours(changeOpeningHours)
+                              let displayChanged = {};
+                              displayChanged.periods = changeOpeningHours
+                              setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
+                            }}
+                           >
+                            { timing.openFullDay ? "Open for Day" : "Close for Day"  }
+                           </div>
+                          </div>
+                          {/* <div
+                            className = "col-md-2"
+                          >
                             <p 
                               style = {{
                                 textAlign: "center",
@@ -573,7 +609,7 @@ export default (props) => {
                             >
                               { isEstablishmentOpen(timing) ? "Open" : "Closed"  }
                             </p>
-                          </div>
+                          </div> */}
                           
                         </div>
                       </div>

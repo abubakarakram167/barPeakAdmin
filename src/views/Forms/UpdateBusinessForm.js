@@ -276,7 +276,8 @@ export default (props) => {
                   open{
                     day,
                     time
-                  }
+                  },
+                  openFullDay
                 }
               }
             }
@@ -302,7 +303,8 @@ export default (props) => {
                   open{
                     day,
                     time
-                  }
+                  },
+                  openFullDay
                 }
               }
             }
@@ -317,7 +319,7 @@ export default (props) => {
           'Authorization': `Bearer ${token}`
         }});
         const singleBusiness = getSingleBusinessData.data.data.getSingleBusiness;
-        console.log("the single Business", singleBusiness);
+       
         if(singleBusiness.customBusiness){
           setCustomField(true)
           const { customData } = singleBusiness;
@@ -362,6 +364,7 @@ export default (props) => {
                   close.day = weekNumber.toString()
                   open.time = "1100"
                   close.time = "2300"
+                  day.openFullDay = period.openFullDay
                   day.open = open;
                   day.close = close; 
                   return day;
@@ -384,7 +387,8 @@ export default (props) => {
                 open: {
                   day: index.toString(),
                   time: "1100"
-                }
+                },
+                openFullDay: true
               }
             })
           }
@@ -427,6 +431,7 @@ export default (props) => {
               day.openName = weekDays[getDayNumber(period.open.day)]
               day.open = period.open.time
               day.openDayNumber = period.open.day
+              day.openFullDay = period.openFullDay;
               day.closeDayNumber = period.close.day
               day.closeName = weekDays[getDayNumber(period.close.day)]
               day.close = period.close.time   
@@ -441,12 +446,11 @@ export default (props) => {
             day.openDayNumber = weekNumber.toString()
             day.closeDayNumber = weekNumber.toString()
             day.closeName = weekDays[getDayNumber(weekNumber)]
+            day.openFullDay = period.openFullDay;
             day.close = "2300" 
             schedulePerWeek.push(day)
             again = false
-          }
-           
-          
+          }  
         })
 
       })
@@ -459,6 +463,7 @@ export default (props) => {
         day.openDayNumber = day
         day.closeDayNumber = day
         dayObject.open =  "11:00"
+        day.openFullDay = true
         dayObject.close = "23:00"
         schedulePerWeek.push(dayObject)
       })
@@ -498,7 +503,8 @@ export default (props) => {
             close: {
               day: day.open.day,
               time: day.close.time
-            }
+            },
+            openFullDay: day.openFullDay
           }
         }
         else 
@@ -515,22 +521,59 @@ export default (props) => {
           setCurrentCloseTime(event.target.value)
         }
       })
-      changeOpeningHours = openingHours.map(day => {
-        if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
-          return {
-            open: {
-              day: day.open.day,
-              time: day.open.time
-            },
-            close: {
-              day: day.open.day,
-              time: event.target.value
+      let completeOpeningTime;
+      let completeClosingTime;
+      const openingTime = currentOpenTime.toString();
+      const closingTime = event.target.value.toString();
+      completeOpeningTime = openingTime.split('')
+      completeOpeningTime.splice( 2, 0 )
+      completeClosingTime = closingTime.split('')
+      completeClosingTime.splice( 2, 0 )
+      const restaurantOpenTime = moment().format("YYYY-MM-DD") + " " + completeOpeningTime.toString().split(',').join("")
+      const restaurantCloseTime = moment().format("YYYY-MM-DD") + " " + completeClosingTime.toString().split(',').join("")
+      
+
+      if(restaurantCloseTime < restaurantOpenTime){
+        changeOpeningHours = openingHours.map(day => {
+          if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
+            const whichDay = parseInt(day.open.day) !== 6 ? parseInt(day.open.day) : -1;
+            return {
+              open: {
+                day: day.open.day,
+                time: day.open.time
+              },
+              close: {
+                day: (whichDay + 1).toString(),
+                time: event.target.value
+              },
+              openFullDay: day.openFullDay
             }
           }
-        }
-        else 
-          return day
-      })
+          else 
+            return day
+        })
+   
+      }
+      else{
+        changeOpeningHours = openingHours.map(day => {
+          if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
+            return {
+              open: {
+                day: day.open.day,
+                time: day.open.time
+              },
+              close: {
+                day: day.open.day,
+                time: event.target.value
+              },
+              openFullDay: day.openFullDay
+            }
+          }
+          else 
+            return day
+        })
+      }
+      
       setOpeningHours(changeOpeningHours)
     }
   })
@@ -562,6 +605,20 @@ export default (props) => {
     if(todaysTime > restaurantOpenTime && todaysTime < restaurantCloseTime ) return true
     return false
     
+  }
+
+  const isClosedOnNextDay = (timings) => {
+    const openingTime = timings.open.toString()
+    const closingTime = timings.close.toString()
+    let completeOpeningTime;
+    let completeClosingTime;
+    completeOpeningTime = openingTime.split('')
+    completeOpeningTime.splice( 2, 0, ':' )
+    completeClosingTime = closingTime.split('')
+    completeClosingTime.splice( 2, 0, ':' )
+    const restaurantOpenTime = moment().format("YYYY-MM-DD") + " " + completeOpeningTime.toString().split(',').join("")
+    const restaurantCloseTime = moment().format("YYYY-MM-DD") + " " + completeClosingTime.toString().split(',').join("")
+    return restaurantCloseTime < restaurantOpenTime ? true : false; 
   }
 
   let photos = formData.uploadedPhotos && formData.uploadedPhotos.length>0 && formData.uploadedPhotos[0].secure_url ? formData.uploadedPhotos: null
@@ -764,7 +821,6 @@ export default (props) => {
                   Establishment Hours
                 </CLabel>
                 { openingHoursFormat && openingHoursFormat.map((timing)=>{
-                     
                     return (
                       <div className = "container" >
                         <div
@@ -826,19 +882,55 @@ export default (props) => {
                           <div
                             className = "col-md-2"
                           >
-                            <p 
-                              style = {{
-                                textAlign: "center",
-                                padding: 5,
-                                backgroundColor: isEstablishmentOpen(timing) ?  '#2f8403' : 'red' ,
-                                borderRadius: 20,
-                                color: 'white'
-                              }}
-                            >
-                              { isEstablishmentOpen(timing) ? "Open" : "Closed"  }
-                            </p>
+                           <div
+                            style = {{
+                              cursor: 'pointer',
+                              fontSize: 14,
+                              fontWeight: '700'
+                            }}
+                            onClick  = {(e)=> {
+                              let changeOpeningHours
+                              changeOpeningHours = openingHours.map(day => {      
+                                if(parseInt(day.open.day) === parseInt(timing.openDayNumber) ){
+                                  return {
+                                    ...day,
+                                    openFullDay: !day.openFullDay
+                                  }
+                                }
+                                else 
+                                  return day
+                              })
+                              console.log("the changeOpeningHours", changeOpeningHours)
+                              setOpeningHours(changeOpeningHours)
+                              let displayChanged = {};
+                              displayChanged.periods = changeOpeningHours
+                              setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
+                            }}
+                           >
+                            { timing.openFullDay ? "Open for Day" : "Close for Day"  }
+                           </div>
                           </div>
-                          
+                          {/* { (isClosedOnNextDay(timing)) && 
+                            <div
+                              className = "col-md-2"
+                            >
+                              <p 
+                                style = {{
+                                  textAlign: "center",
+                                  padding: 5,
+                                  borderRadius: 20,
+                                  color: 'black',
+                                  fontSize: 12,
+                                  fontWeight: '700'
+                                }}
+                              >
+                                Next Day
+                              </p>
+                            </div>
+                          }        */}
+                          {
+
+                          }
                         </div>
                       </div>
                     );
