@@ -344,33 +344,41 @@ export default (props) => {
           singleBusiness.googleBusiness.opening_hours.periods.length 
         ){
           tobeChangeHours.periods = singleBusiness.googleBusiness.opening_hours.periods;
+          
           let addMissingDays = [];
           const daysPerWeek = [0,1,2,3,4,5,6];
           let allOpenDays = tobeChangeHours.periods.map(period => parseInt(period.open.day))
-         
-          if(tobeChangeHours&& tobeChangeHours.length){  
+      
+          if(tobeChangeHours.periods && tobeChangeHours.periods.length){  
             tobeChangeHours.periods = daysPerWeek.map( weekNumber => { 
               let again = true;
-               for (let period of tobeChangeHours){
+              
                 if( again && allOpenDays.includes(weekNumber)){
-                  if( parseInt(period.open.day) === weekNumber )
-                   return period
+                  for (let period of tobeChangeHours.periods){
+                    if(parseInt(period.open.day) === parseInt(weekNumber)  ){
+                      again = false
+                      return period
+                    }  
+                  } 
                 }
-                else if(again){
+                else if(again) {
                   let day = {};
                   let open = {};
                   let close = {};
-                  open.day = weekNumber.toString()
-                  close.day = weekNumber.toString()
+                  open.day = weekNumber.toString();
+                  close.day = weekNumber.toString();
                   open.time = "1100"
                   close.time = "2300"
-                  day.openFullDay = period.openFullDay
+                  again = false
+                  day.openFullDay = true
                   day.open = open;
                   day.close = close; 
                   return day;
                 }
-              }
+              
             })
+
+            console.log("after fetch all Days....", tobeChangeHours)
           }
         }else if(singleBusiness) {
           if(singleBusiness.customData && singleBusiness.customData.opening_hours){
@@ -393,6 +401,7 @@ export default (props) => {
             })
           }
         }
+        console.log("to basda", tobeChangeHours.periods)
         
         setCurrentOpenTime(tobeChangeHours.periods[0].open.time.toString())
         setCurrentCloseTime(tobeChangeHours.periods[0].close.time.toString())
@@ -493,23 +502,62 @@ export default (props) => {
           setCurrentOpenTime(event.target.value)
         }
       })
-      changeOpeningHours = openingHours.map(day => {
-        if(parseInt(day.open.day) === parseInt(currentWeekDayName)){
-          return {
-            open: {
-              day: day.open.day,
-              time: event.target.value
-            },
-            close: {
-              day: day.open.day,
-              time: day.close.time
-            },
-            openFullDay: day.openFullDay
+
+      let completeOpeningTime;
+      let completeClosingTime;
+      const openingTime = event.target.value.toString();
+      const closingTime = currentCloseTime.toString();
+      completeOpeningTime = openingTime.split('')
+      completeOpeningTime.splice( 2, 0 )
+      completeClosingTime = closingTime.split('')
+      completeClosingTime.splice( 2, 0 )
+      const restaurantOpenTime = moment().format("YYYY-MM-DD") + " " + completeOpeningTime.toString().split(',').join("")
+      const restaurantCloseTime = moment().format("YYYY-MM-DD") + " " + completeClosingTime.toString().split(',').join("")
+      
+
+      if(restaurantCloseTime < restaurantOpenTime){
+        changeOpeningHours = openingHours.map(day => {
+          if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
+            const whichDay = parseInt(day.open.day) !== 6 ? parseInt(day.open.day) : -1;
+            return {
+              open: {
+                day: day.open.day,
+                time: day.open.time
+              },
+              close: {
+                day: (whichDay + 1).toString(),
+                time: event.target.value
+              },
+              openFullDay: day.openFullDay
+            }
           }
-        }
-        else 
-          return day
-      })
+          else 
+            return day
+        })
+   
+      }
+      else{
+        changeOpeningHours = openingHours.map(day => {
+          if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
+            return {
+              open: {
+                day: day.open.day,
+                time: day.open.time
+              },
+              close: {
+                day: day.open.day,
+                time: event.target.value
+              },
+              openFullDay: day.openFullDay
+            }
+          }
+          else 
+            return day
+        })
+      }
+
+
+      console.log("the change Opening Hours", changeOpeningHours)
       setOpeningHours(changeOpeningHours)
       displayChanged.periods = changeOpeningHours
       setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
@@ -573,6 +621,7 @@ export default (props) => {
             return day
         })
       }
+      console.log("changeOpeningHours", changeOpeningHours)
       
       setOpeningHours(changeOpeningHours)
     }
@@ -821,6 +870,7 @@ export default (props) => {
                   Establishment Hours
                 </CLabel>
                 { openingHoursFormat && openingHoursFormat.map((timing)=>{
+                  // console.log("the timing", timing)
                     return (
                       <div className = "container" >
                         <div
@@ -889,7 +939,7 @@ export default (props) => {
                               fontWeight: '700'
                             }}
                             onClick  = {(e)=> {
-                              let changeOpeningHours
+                              let changeOpeningHours;
                               changeOpeningHours = openingHours.map(day => {      
                                 if(parseInt(day.open.day) === parseInt(timing.openDayNumber) ){
                                   return {
@@ -900,11 +950,12 @@ export default (props) => {
                                 else 
                                   return day
                               })
-                              console.log("the changeOpeningHours", changeOpeningHours)
+
+                              console.log("the changeOpeningHours....", changeOpeningHours)
                               setOpeningHours(changeOpeningHours)
                               let displayChanged = {};
-                              displayChanged.periods = changeOpeningHours
-                              setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged))
+                              displayChanged.periods = changeOpeningHours;
+                              setOpeningHoursFormat(getSpecificTimingPerWeekFormat(displayChanged));
                             }}
                            >
                             { timing.openFullDay ? "Open for Day" : "Close for Day"  }
