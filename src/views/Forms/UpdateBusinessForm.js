@@ -514,19 +514,19 @@ export default (props) => {
       const restaurantOpenTime = moment().format("YYYY-MM-DD") + " " + completeOpeningTime.toString().split(',').join("")
       const restaurantCloseTime = moment().format("YYYY-MM-DD") + " " + completeClosingTime.toString().split(',').join("")
       
-
       if(restaurantCloseTime < restaurantOpenTime){
+      
         changeOpeningHours = openingHours.map(day => {
           if(parseInt(day.open.day) === parseInt(currentWeekDayName) ){
             const whichDay = parseInt(day.open.day) !== 6 ? parseInt(day.open.day) : -1;
             return {
               open: {
                 day: day.open.day,
-                time: day.open.time
+                time: event.target.value
               },
               close: {
                 day: (whichDay + 1).toString(),
-                time: event.target.value
+                time: day.close.time
               },
               openFullDay: day.openFullDay
             }
